@@ -1,6 +1,6 @@
 using Xunit.Abstractions;
 
-namespace Bastion.Tests;
+namespace Bastion.Tests.UnitTests.Domain.Encryption;
 
 public class UnitTest1
 {
