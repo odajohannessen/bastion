@@ -24,8 +24,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
       working-directory: 'Bastion'
-    #- name: Test
-    #  run: dotnet test 
-    #  working-directory: 'Project/CampusEats/CampusEats.Tests'
-    # TODO: Add when creating tests
+    - name: Test
+      run: dotnet test 
+      working-directory: 'Project/CampusEats/CampusEats.Tests'
 # run: dotnet test  --no-restore --verbosity normal
