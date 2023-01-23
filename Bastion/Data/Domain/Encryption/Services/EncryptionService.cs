@@ -4,9 +4,10 @@ namespace Bastion.Data.Domain.Encryption.Services;
 
 public class EncryptionService : IEncryptionService
 {
-    public async Task<bool> EncryptSecret(string plaintext)
+    public async Task<bool> EncryptSecret(string plaintext) // TODO: Does this need to be a task?
     {
-        // TODO: Should we implement some logging here? Security risks?
+        // TODO: Should we implement some logging here? Security risks? 
+        // TODO: Where to store logs? Blob? 
         // TODO: Which Aes class to use? Gcm? Cng? Document choice
         string plaintextTest = "Lets encrypt this";
         using (Aes aes = Aes.Create())

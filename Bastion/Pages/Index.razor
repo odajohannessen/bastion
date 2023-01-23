@@ -1,9 +1,56 @@
 ﻿@page "/"
 
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.Logging
+@inject ILogger<Index> Logger
+@using Bastion.Data.Domain.UserInput;
+@using Bastion.Data.Domain.Encryption;
+@using Bastion.Data.Domain.Encryption.Services;
+
 <PageTitle>Bastion</PageTitle>
 
 <h1>Encrypt your secret</h1>
 
-Set key length.
+<EditForm Model="@exampleModel" OnSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>
+        Secret message:
+        <InputText id="name" @bind-Value="exampleModel.Plaintext" />
+
+    </label>
+    <br/> <br/>
+    <label>
+        Lifetime (hours):
+        <InputNumber id="lifetime" @bind-Value="exampleModel.Lifetime" />
+    </label>
+    <br/><br/>
+    <button type="submit">Encrypt message</button>
+</EditForm>
+
+<br/>
+
+<h1>Display encrypted secret and lifetime here</h1>
+<div>@exampleModel.Plaintext</div>
+<div>@exampleModel.Lifetime</div>
 
 @*<SurveyPrompt Title="How is Blazor working for you?" /> *@
+
+@code {
+    private ExampleModel exampleModel = new();
+
+    private void HandleValidSubmit()
+    {
+        Logger.LogInformation("HandleSubmit called");
+
+        // Process the form
+        // Process by creating a user object and a dto to send to Encryption domain? 
+        // TODO: Have code here or in separate file? 
+
+        // Display the encrypted secret for testing purposes
+        // Could we have a user input DTO func? 
+        // bool success;
+        // How do we utilize the service here? 
+        // Do we need mediator? If it is a thing for Blazor
+    }
+}
