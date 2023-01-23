@@ -9,14 +9,15 @@
 
 <PageTitle>Bastion</PageTitle>
 
-<h1>Encrypt your secret</h1>
+<h1>Encrypt your secret using AES</h1>
 
 <EditForm Model="@exampleModel" OnSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <label>
-        Secret message:
-        <InputText id="name" @bind-Value="exampleModel.Plaintext" />
+        Secret message: 
+        <br/>
+        <InputTextArea style="width: 300%" rows="15" id="plaintext" @bind-Value="exampleModel.Plaintext" />
 
     </label>
     <br/> <br/>
