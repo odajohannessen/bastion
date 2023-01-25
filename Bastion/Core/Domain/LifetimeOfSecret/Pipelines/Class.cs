@@ -1,4 +1,4 @@
-﻿namespace Bastion.Data.Domain.LifetimeOfSecret.Pipelines
+﻿namespace Bastion.Core.Domain.LifetimeOfSecret.Pipelines
 {
     public class Class
     {

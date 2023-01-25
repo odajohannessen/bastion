@@ -1,4 +1,4 @@
-﻿namespace Bastion.Data.Domain.LifetimeOfSecret.Handlers
+﻿namespace Bastion.Core.Domain.LifetimeOfSecret.Handlers
 {
     public class Class
     {

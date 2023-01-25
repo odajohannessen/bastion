@@ -1,22 +1,20 @@
 ﻿using System.Security.Cryptography;
 
-namespace Bastion.Data.Domain.Encryption.Services;
+namespace Bastion.Core.Domain.Encryption.Services;
 
 public class EncryptionService : IEncryptionService
 {
-    public async Task<bool> EncryptSecret(string plaintext) // TODO: Does this need to be a task?
+    public async Task<byte[]> EncryptSecret(string plaintext) // TODO: Does this need to be a task?
     {
         // TODO: Should we implement some logging here? Security risks? 
         // TODO: Where to store logs? Blob? 
         // TODO: Which Aes class to use? Gcm? Cng? Document choice
-        string plaintextTest = "Lets encrypt this";
         using (Aes aes = Aes.Create())
         {
-            byte[] encryptedData = EncryptStringToBytes(plaintextTest, aes.Key, aes.IV);
+            byte[] encryptedData = EncryptStringToBytes(plaintext, aes.Key, aes.IV);
+            return encryptedData; // TODO: Should return the secret
 
         }
-
-        return true;
     }
 
     private static byte[] EncryptStringToBytes(string plaintext, byte[] key, byte[] IV)
@@ -49,14 +47,23 @@ public class EncryptionService : IEncryptionService
                 // Create encryptor to transform input plaintext to byte array ciphertext
                 ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
-                // TODO: Any difference to this than doing using? Okay?
-                MemoryStream ms = new MemoryStream();
-                CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
-                StreamWriter sw = new StreamWriter(cs);
-                sw.Write(plaintext);
-                encryptedData = ms.ToArray();
+                // Streams for encryption
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter sw = new StreamWriter(cs))
+                        {
+                            sw.Write(plaintext);
+                        }
+                        encryptedData = ms.ToArray(); 
+                    }
+                }
 
                 return encryptedData;
+
+                // TODO: Unit test for encrypt and decrypt
+                // TODO: Choice of key length? Performance vs security
             }
 
         }

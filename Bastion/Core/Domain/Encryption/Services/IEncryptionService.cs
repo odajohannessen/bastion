@@ -1,4 +1,4 @@
-﻿namespace Bastion.Data.Domain.Encryption.Services;
+﻿namespace Bastion.Core.Domain.Encryption.Services;
 
 public interface IEncryptionService
 {
@@ -8,5 +8,5 @@ public interface IEncryptionService
     // TODO: Return Bool? 
     // TODO: Should it be a task? 
 
-    Task<bool> EncryptSecret(string plaintext);
+    Task<byte[]> EncryptSecret(string plaintext);
 }

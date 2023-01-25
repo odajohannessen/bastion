@@ -1,4 +1,4 @@
-﻿namespace Bastion.Data.Domain.DisplaySecret
+﻿namespace Bastion.Core.Domain.DisplaySecret
 {
     public class Class
     {

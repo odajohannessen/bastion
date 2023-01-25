@@ -1,29 +1,29 @@
 ﻿@page "/"
 
 @using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.Extensions.Logging
-@inject ILogger<Index> Logger
-@using Bastion.Data.Domain.UserInput;
-@using Bastion.Data.Domain.Encryption;
-@using Bastion.Data.Domain.Encryption.Services;
+@using Bastion.Core.Domain.UserInput;
+@using Bastion.Core.Domain.UserInput.Dto;
+@using Bastion.Core.Domain.Encryption;
+@using Bastion.Core.Domain.Encryption.Pipelines;
+@using Bastion.Core.Domain.UserInput.Pipelines;
 
 <PageTitle>Bastion</PageTitle>
 
 <h1>Encrypt your secret using AES</h1>
 
-<EditForm Model="@exampleModel" OnSubmit="@HandleValidSubmit">
+<EditForm Model="@userInputModel" OnSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <label>
         Secret message: 
         <br/>
-        <InputTextArea style="width: 300%" rows="15" id="plaintext" @bind-Value="exampleModel.Plaintext" />
+        <InputTextArea style="width: 300%" rows="15" id="plaintext" @bind-Value="userInputModel.SecretPlaintext" />
 
     </label>
     <br/> <br/>
     <label>
         Lifetime (hours):
-        <InputNumber id="lifetime" @bind-Value="exampleModel.Lifetime" />
+        <InputNumber id="lifetime" @bind-Value="userInputModel.Lifetime" />
     </label>
     <br/><br/>
     <button type="submit">Encrypt message</button>
@@ -32,19 +32,42 @@
 <br/>
 
 <h1>Display encrypted secret and lifetime here</h1>
-<div>@exampleModel.Plaintext</div>
-<div>@exampleModel.Lifetime</div>
+<div>@encryptedString</div>
 
 @*<SurveyPrompt Title="How is Blazor working for you?" /> *@
 
 @code {
-    private ExampleModel exampleModel = new();
+    private UserInputModel userInputModel = new();
+    private string encryptedString = "";
 
-    private void HandleValidSubmit()
+    private async void HandleValidSubmit()
     {
         Logger.LogInformation("HandleSubmit called");
 
-        // Process the form
+        var responseInput = await mediator.Send(new CreateUserInput.Request(userInputModel.SecretPlaintext, userInputModel.Lifetime));
+
+        if (responseInput.success)
+        {
+            Logger.LogInformation("UserInput created");
+
+            // Create UserInputDto
+            UserInput userInput = responseInput.userInput;
+            UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.SecretPlaintext, userInput.Lifetime); 
+            
+            // Encrypt and store data 
+            var response = await mediator.Send(new EncryptSecret.Request(userInputDto));
+
+            if (response.encryptedData is not null)
+            {
+                encryptedString = System.Text.Encoding.Default.GetString(response.encryptedData);
+            }
+            else
+            {
+                encryptedString = "Failure";
+            }
+
+        }
+
         // Process by creating a user object and a dto to send to Encryption domain? 
         // TODO: Have code here or in separate file? 
 
@@ -52,6 +75,8 @@
         // Could we have a user input DTO func? 
         // bool success;
         // How do we utilize the service here? 
-        // Do we need mediator? If it is a thing for Blazor
+
+        // TODO: Send userinput object to service with a request to payment service
+        // TODO: Do a pipeline for userinput object perhaps? 
     }
 }

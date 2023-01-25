@@ -1,4 +1,4 @@
-﻿namespace Bastion.Data.Domain.Decryption;
+﻿namespace Bastion.Core.Domain.Decryption;
 
 public class UserSecretDecrypted
 {

@@ -1,5 +1,7 @@
-using Bastion.Data;
-using Bastion.Data.Domain.Encryption.Services;
+using Bastion.Core; 
+using Bastion.Core.Domain.Encryption.Services;
+using MediatR;
+using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -10,6 +12,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddTransient<IEncryptionService, EncryptionService>();
+builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
 
