@@ -17,3 +17,5 @@ public class UserInput // TODO: Inherit from BaseEntity? Create base entity?
     public string SecretPlaintext { get; protected set; } // TODO: Protected get and protected set? 
     public int Lifetime { get; protected set; } // TODO: Protected get and protected set? 
 }
+
+// TODO: Update to plaintext and ciphertext, along with theory
