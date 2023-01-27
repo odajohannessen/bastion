@@ -55,11 +55,11 @@
             UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.SecretPlaintext, userInput.Lifetime); 
             
             // Encrypt and store data 
-            var response = await mediator.Send(new EncryptSecret.Request(userInputDto));
+            var response = await mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
 
-            if (response.encryptedData is not null)
+            if (response.ciphertextBytes is not null)
             {
-                encryptedString = System.Text.Encoding.Default.GetString(response.encryptedData);
+                encryptedString = System.Text.Encoding.Default.GetString(response.ciphertextBytes);
             }
             else
             {
