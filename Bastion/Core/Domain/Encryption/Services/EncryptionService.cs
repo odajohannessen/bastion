@@ -4,29 +4,28 @@ namespace Bastion.Core.Domain.Encryption.Services;
 
 public class EncryptionService : IEncryptionService
 {
-    public async Task<byte[]> EncryptSecret(string plaintext) // TODO: Does this need to be a task?
+    public async Task<(byte[], byte[], byte[])> EncryptSecret(string plaintext) // TODO: Does this need to be a task?
     {
         // TODO: Should we implement some logging here? Security risks? 
         // TODO: Where to store logs? Blob? 
         // TODO: Which Aes class to use? Gcm? Cng? Document choice
         using (Aes aes = Aes.Create())
         {
-            byte[] encryptedData = EncryptStringToBytes(plaintext, aes.Key, aes.IV);
-            return encryptedData; // TODO: Should return the secret
-
+            var encryptionResponse = EncryptStringToBytes(plaintext, aes.Key, aes.IV);
+            return encryptionResponse;
         }
     }
 
-    private static byte[] EncryptStringToBytes(string plaintext, byte[] key, byte[] IV)
+    private static (byte[], byte[], byte[]) EncryptStringToBytes(string plaintext, byte[] Key, byte[] IV)
     {
         // Check validity of input
         if (plaintext == null || plaintext.Length <= 0) 
         {
             throw new ArgumentNullException(nameof(plaintext));       
         }
-        else if (key == null || key.Length <= 0) 
+        else if (Key == null || Key.Length <= 0) 
         {
-            throw new ArgumentNullException(nameof(key));
+            throw new ArgumentNullException(nameof(Key));
         }
         else if (IV == null || IV.Length <= 0) 
         {
@@ -34,14 +33,14 @@ public class EncryptionService : IEncryptionService
         }
 
         // Byte array
-        byte[] encryptedData;
+        byte[] ciphertextBytes;
 
         try
         {
             // AES object with key and initialization vector (IV)
             using (Aes aes = Aes.Create())
             {
-                aes.Key = key;
+                aes.Key = Key;
                 aes.IV = IV;
 
                 // Create encryptor to transform input plaintext to byte array ciphertext
@@ -56,11 +55,11 @@ public class EncryptionService : IEncryptionService
                         {
                             sw.Write(plaintext);
                         }
-                        encryptedData = ms.ToArray(); 
+                        ciphertextBytes = ms.ToArray(); 
                     }
                 }
 
-                return encryptedData;
+                return (ciphertextBytes, aes.Key, aes.IV);
 
                 // TODO: Unit test for encrypt and decrypt
                 // TODO: Choice of key length? Performance vs security

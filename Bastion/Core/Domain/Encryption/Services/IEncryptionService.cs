@@ -2,11 +2,9 @@
 
 public interface IEncryptionService
 {
-    // TODO: Encrypt secret
     // TODO: Store in Azure storage
-    // TODO: Input? DTO object? userInput object? 
-    // TODO: Return Bool? 
+    // TODO: Return Bool? For testing: encrypted byte array, key and IV
     // TODO: Should it be a task? 
 
-    Task<byte[]> EncryptSecret(string plaintext);
+    Task<(byte[], byte[], byte[])> EncryptSecret(string plaintext);
 }

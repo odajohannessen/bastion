@@ -8,7 +8,7 @@ namespace Bastion.Core.Domain.Encryption.Pipelines;
 public class EncryptAndSaveSecret
 {
     public record Request(UserInputDto userInputDto) : IRequest<Response>; 
-    public record Response(byte[] ciphertextBytes);
+    public record Response(byte[] ciphertextBytes, byte[] key, byte[] IV);
 
     public class Handler : IRequestHandler<Request, Response>
     {
@@ -21,12 +21,15 @@ public class EncryptAndSaveSecret
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
-            byte[] ciphertextBytes; 
+            (byte[], byte[], byte[]) encryptionResponse;
+            string ciphertext;
 
             try
             {
                 // Encrypt data
-                ciphertextBytes = await EncryptionService.EncryptSecret(request.userInputDto.SecretPlaintext);
+                encryptionResponse = await EncryptionService.EncryptSecret(request.userInputDto.SecretPlaintext);
+                ciphertext = System.Text.Encoding.Default.GetString(encryptionResponse.Item1);
+
             }
             catch (Exception ex)
             {
@@ -35,15 +38,16 @@ public class EncryptAndSaveSecret
 
             // Create UserSecret object 
             UserInputDto userInputDto = request.userInputDto;
-            UserSecret userSecret =  new UserSecret(userInputDto.Id, userInputDto.SecretPlaintext, userInputDto.Lifetime, userInputDto.TimesStamp);
+            UserSecret userSecret =  new UserSecret(userInputDto.Id, ciphertext, userInputDto.Lifetime, userInputDto.TimesStamp, encryptionResponse.Item2, encryptionResponse.Item3);
+            
             // TODO: Try catch here of user secret
             // TODO: Need to return anything else here except bool?
             // TODO: Call on storage service here. Secret ID is blob name
             // TODO: Where should lifetime be stored? Separate blob id-lifetime name? 
             // TODO: We also need to store key with secret ID in KV
-            // URL = guid 
+            // TODO: URL = guid 
 
-            return new Response(ciphertextBytes);
+            return new Response(encryptionResponse.Item1, encryptionResponse.Item2, encryptionResponse.Item3);
         }
     }
 

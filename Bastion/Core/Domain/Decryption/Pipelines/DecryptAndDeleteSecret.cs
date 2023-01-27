@@ -7,7 +7,7 @@ namespace Bastion.Core.Domain.Decryption.Pipelines;
 public class DecryptAndDeleteSecret
 {
     // TODO: What will be input here? String from storage? byte? 
-    public record Request(byte[] CiphertextBytes) : IRequest<Response>;
+    public record Request(byte[] ciphertextBytes, byte[] key, byte[] IV) : IRequest<Response>;
     public record Response(string Plaintext);
     // TODO: Id as input?
     // TODO: Delete secret from storage in this pipeline
@@ -29,7 +29,7 @@ public class DecryptAndDeleteSecret
             try
             {
                 // TODO: Fetch secret and key from URL ID 
-                plaintext = await DecryptionService.DecryptSecret(request.CiphertextBytes); // Also need key, need IV?
+                plaintext = await DecryptionService.DecryptSecret(request.ciphertextBytes, request.key, request.IV); // Also need key, need IV?
                 // TODO: Delete secret
             }
             catch (Exception ex) 

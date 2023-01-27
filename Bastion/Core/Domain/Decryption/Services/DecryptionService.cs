@@ -4,14 +4,14 @@ namespace Bastion.Core.Domain.Decryption.Services;
 
 public class DecryptionService : IDecryptionService
 {
-    public async Task<string> DecryptSecret(byte[] ciphertext) // TODO: Does this need to be a task?
+    public async Task<string> DecryptSecret(byte[] ciphertextBytes, byte[] key, byte[] IV) // TODO: Does this need to be a task?
     {
         // TODO: Should we implement some logging here? Security risks? 
         // TODO: Where to store logs? Blob? 
         // TODO: Which Aes class to use? Gcm? Cng? Document choice
         using (Aes aes = Aes.Create())
         {
-            string decryptedData = DecryptStringFromBytes(ciphertext, aes.Key, aes.IV);
+            string decryptedData = DecryptStringFromBytes(ciphertextBytes, aes.Key, aes.IV);
             return decryptedData; // TODO: Should return the secret
 
         }

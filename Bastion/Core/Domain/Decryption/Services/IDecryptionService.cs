@@ -8,5 +8,5 @@ public interface IDecryptionService
     // TODO: Return Bool? 
     // TODO: Should it be a task? 
 
-    Task<string> DecryptSecret(byte[] ciphertext);
+    Task<string> DecryptSecret(byte[] ciphertextBytes, byte[] key, byte[] IV);
 }

@@ -3,9 +3,11 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Bastion.Core.Domain.UserInput;
 @using Bastion.Core.Domain.UserInput.Dto;
+@using Bastion.Core.Domain.UserInput.Pipelines;
 @using Bastion.Core.Domain.Encryption;
 @using Bastion.Core.Domain.Encryption.Pipelines;
-@using Bastion.Core.Domain.UserInput.Pipelines;
+@using Bastion.Core.Domain.Decryption;
+@using Bastion.Core.Domain.Decryption.Pipelines;
 
 <PageTitle>Bastion</PageTitle>
 
@@ -33,12 +35,15 @@
 
 <h1>Display encrypted secret and lifetime here</h1>
 <div>@encryptedString</div>
+<h1>Display decrypted secret here</h1>
+<div>@decryptedString</div>
 
 @*<SurveyPrompt Title="How is Blazor working for you?" /> *@
 
 @code {
     private UserInputModel userInputModel = new();
     private string encryptedString = "";
+    private string decryptedString = "";
 
     private async void HandleValidSubmit()
     {
@@ -53,7 +58,7 @@
             // Create UserInputDto
             UserInput userInput = responseInput.userInput;
             UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.SecretPlaintext, userInput.Lifetime); 
-            
+            // Need key here as well, and IV? Store key and IV in same kv? 
             // Encrypt and store data 
             var response = await mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
 
@@ -66,6 +71,9 @@
                 encryptedString = "Failure";
             }
 
+            // Decrypt data for testing
+            var responseDecrypt = await mediator.Send(new DecryptAndDeleteSecret.Request(response.ciphertextBytes, response.key, response.IV));
+            decryptedString = responseDecrypt.Plaintext;
         }
 
         // Process by creating a user object and a dto to send to Encryption domain? 
