@@ -40,6 +40,7 @@ public class EncryptionService : IEncryptionService
             // AES object with key and initialization vector (IV)
             using (Aes aes = Aes.Create())
             {
+                aes.Padding = PaddingMode.PKCS7;
                 aes.Key = Key;
                 aes.IV = IV;
 

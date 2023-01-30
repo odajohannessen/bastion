@@ -2,6 +2,8 @@
 using Bastion.Core.Domain.Encryption;
 using Bastion.Core.Domain.Encryption.Services;
 using Bastion.Core.Domain.UserInput.Dto;
+using Bastion.Core.Domain.Decryption.Pipelines; // For testing
+using Bastion.Core.Domain.Decryption.Services;
 
 namespace Bastion.Core.Domain.Encryption.Pipelines;
 
@@ -29,7 +31,6 @@ public class EncryptAndSaveSecret
                 // Encrypt data
                 encryptionResponse = await EncryptionService.EncryptSecret(request.userInputDto.SecretPlaintext);
                 ciphertext = System.Text.Encoding.Default.GetString(encryptionResponse.Item1);
-
             }
             catch (Exception ex)
             {

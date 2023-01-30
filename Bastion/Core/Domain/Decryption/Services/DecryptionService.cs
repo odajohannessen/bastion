@@ -9,12 +9,10 @@ public class DecryptionService : IDecryptionService
         // TODO: Should we implement some logging here? Security risks? 
         // TODO: Where to store logs? Blob? 
         // TODO: Which Aes class to use? Gcm? Cng? Document choice
-        using (Aes aes = Aes.Create())
-        {
-            string decryptedData = DecryptStringFromBytes(ciphertextBytes, aes.Key, aes.IV);
-            return decryptedData; // TODO: Should return the secret
 
-        }
+        string plaintext = DecryptStringFromBytes(ciphertextBytes, key, IV);
+        return plaintext; // TODO: Should return the secret
+  
     }
 
     private static string DecryptStringFromBytes(byte[] ciphertext, byte[] Key, byte[] IV)
@@ -33,12 +31,13 @@ public class DecryptionService : IDecryptionService
             throw new ArgumentNullException(nameof(IV));
         }
 
-        string plaintext = "";
+        string plaintext;
 
         try
         {
             using(Aes aes = Aes.Create())
             {
+                aes.Padding = PaddingMode.PKCS7;
                 aes.Key = Key;
                 aes.IV = IV;
 
