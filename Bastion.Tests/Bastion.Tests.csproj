@@ -23,7 +23,10 @@
 
   <ItemGroup>
     <Folder Include="IntegrationTests\" />
-    <Folder Include="UnitTests\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bastion\Bastion.csproj" />
   </ItemGroup>
 
 </Project>

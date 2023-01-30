@@ -10,7 +10,7 @@ public class UserSecret // TODO: Inherit from BaseEntity? Create base entity? Sh
     {
         Id = id;
         TimeStamp = timeStamp;
-        Ciphertext = ciphertext;
+        Ciphertext = ciphertext; // TODO: Change this to byte[]?
         Lifetime = inputLifetime;
         Key = key;
         IV = iv;
