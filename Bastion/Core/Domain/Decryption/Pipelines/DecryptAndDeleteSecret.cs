@@ -35,7 +35,6 @@ public class DecryptAndDeleteSecret
             catch (Exception ex) 
             {
                 throw new Exception(ex.Message, ex);
-                // TODO: Fix issue with padding
             }
 
             return new Response(plaintext); // TODO: Return bool?
