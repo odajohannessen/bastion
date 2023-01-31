@@ -6,7 +6,7 @@ namespace Bastion.Tests.Core.Domain.UserInputSecret;
 public class UserInputTest
 {
     [Fact]
-    public void CreateUserSecret()
+    public void CreateUserInput()
     {
         // Arrange
         string plaintext = "test";

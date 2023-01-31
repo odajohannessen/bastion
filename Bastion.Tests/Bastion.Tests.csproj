@@ -22,11 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="IntegrationTests\" />
+    <ProjectReference Include="..\Bastion\Bastion.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bastion\Bastion.csproj" />
+    <Folder Include="IntegrationTests\" />
   </ItemGroup>
 
 </Project>
