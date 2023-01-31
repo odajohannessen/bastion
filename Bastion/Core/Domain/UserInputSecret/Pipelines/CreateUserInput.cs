@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Bastion.Core.Domain.UserInput;
+using Bastion.Core.Domain.UserInputSecret;
 
-namespace Bastion.Core.Domain.UserInput.Pipelines;
+namespace Bastion.Core.Domain.UserInputSecret.Pipelines;
 
 public class CreateUserInput
 {

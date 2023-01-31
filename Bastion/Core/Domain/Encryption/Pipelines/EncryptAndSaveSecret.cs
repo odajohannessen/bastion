@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Bastion.Core.Domain.Encryption;
 using Bastion.Core.Domain.Encryption.Services;
-using Bastion.Core.Domain.UserInput.Dto;
+using Bastion.Core.Domain.UserInputSecret.Dto;
 using Bastion.Core.Domain.Decryption.Pipelines; // For testing
 using Bastion.Core.Domain.Decryption.Services;
 

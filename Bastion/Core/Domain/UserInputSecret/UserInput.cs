@@ -1,4 +1,4 @@
-﻿namespace Bastion.Core.Domain.UserInput;
+﻿namespace Bastion.Core.Domain.UserInputSecret;
 
 public class UserInput // TODO: Inherit from BaseEntity? Create base entity? 
 {
