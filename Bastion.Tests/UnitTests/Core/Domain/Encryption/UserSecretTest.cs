@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace Bastion.Tests.Core.Domain.Encryption;
 
-public class UserSecretTest
+public class UserInputTest
 {
     [Fact]
     public void CreateUserSecret()

@@ -57,7 +57,7 @@
 
             // Create UserInputDto
             UserInput userInput = responseInput.userInput;
-            UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.SecretPlaintext, userInput.Lifetime);
+            UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.Plaintext, userInput.Lifetime);
             // Need key here as well, and IV? Store key and IV in same kv? 
             // Encrypt and store data 
             var response = await mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
