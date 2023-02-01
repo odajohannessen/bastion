@@ -5,11 +5,11 @@ namespace Bastion.Core.Domain.Encryption.Services;
 
 public class StorageService
 {
-    async Task<bool> StoreSecret(UserSecret userSecret)
+    public async Task<bool> StoreSecret(UserSecret userSecret)
     {
         // Check input UserSecret
         // TODO: Check other values? Valid timestamp etc?
-        if (userSecret == null) 
+        if (userSecret == null)
         {
             return false;
         }
@@ -21,14 +21,29 @@ public class StorageService
         byte[] key = userSecret.Key;
 
         // TODO: Method for storing secret 
-        
+        var successBlob = StoreSecretInBlobStorage(jsonData, userSecret.Id);
+
+        //if (successBlob)
+        // if (successKey)
+
         // TODO: Method for storing key
 
         return true; // TODO: Return id on success? 
     }
 
     // Stores the jsonData string in blob storage
+    public async Task<bool> StoreSecretInBlobStorage(string secretJsonFormat, Guid id)
+    {
+        if (secretJsonFormat == null) 
+        {
+            // Throw error
+        }
 
+
+
+        // TODO: Upload to blob
+        return true;
+    }
 
     // Stores the key in key vault
 
