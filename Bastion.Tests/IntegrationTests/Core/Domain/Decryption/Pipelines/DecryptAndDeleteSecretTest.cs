@@ -7,7 +7,7 @@ namespace Bastion.Tests.Core.Domain.Decryption.Pipelines;
 public class DecryptAndDeleteSecretTest
 {
     [Fact]
-    public void CreateUserSecret()
+    public void DecryptAndDeleteOneSecret()
     {
         // Arrange
 
