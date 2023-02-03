@@ -2,6 +2,12 @@
 using System.Text.Json.Serialization;
 using Azure.Storage.Blobs;
 using System.Text;
+using Microsoft.Azure.KeyVault;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Core;
+using Azure.Storage.Blobs.Models;
+using Azure;
 
 namespace Bastion.Core.Domain.Encryption.Services;
 
@@ -16,13 +22,9 @@ public class StorageService : IStorageService
             return false;
         }
 
-        // Secret 
+        // Secret format for storage
         string jsonData = SecretStorageFormat(userSecret);
 
-        // Key
-        byte[] key = userSecret.Key;
-
-        // TODO: Method for storing secret 
         var successBlob = await StoreSecretInBlobStorage(jsonData, userSecret.Id);
 
         if (!successBlob)
@@ -30,9 +32,12 @@ public class StorageService : IStorageService
             return false;
         }
 
-        // TODO: Method for storing key
-        // if (successKey)
+        var successKey = await StorKeyInKeyVault(userSecret.Key, userSecret.Id);
 
+        if (!successKey)
+        {
+            return false;
+        }
 
         return true; // TODO: Return id on success? 
     }
@@ -45,25 +50,37 @@ public class StorageService : IStorageService
             throw new Exception("Secret cannot be empty");
         }
 
-        // Connection string (will be replaced by MI) and container name 
-        var StorageAccountConnectionString = "<add here>";
-        var StorageContainerName = "secrets-test";
+        // Key vault
+        string keyVaultName = "kvbastion";
+        string secretName = "userAssignedClientId";
+        var uriKV = $"https://{keyVaultName}.vault.azure.net/";
+        
+        // Storage container
+        string StorageContainerName = "secrets-test";
+        string StorageAccountName = "sabastion";
+        string blobName = $"{id}.json";
+        string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
-        // File name
-        string fileName = $"{id}.json";
+        // Get User assigned client ID from key vault (through SA MI between web app and key vault)
+        SecretClient secretClient = new SecretClient(new Uri(uriKV), new DefaultAzureCredential());
+        Response<KeyVaultSecret> secret = secretClient.GetSecret(secretName);
+        string userAssignedClientId = secret.Value.Value.ToString();
+
+        var options = new DefaultAzureCredentialOptions
+        {
+            ExcludeEnvironmentCredential = true,
+            ExcludeManagedIdentityCredential = false,
+            ManagedIdentityClientId = userAssignedClientId,
+        };
+        var credentials = new DefaultAzureCredential();
 
         try
         {
-            var blobServiceClient = new BlobServiceClient(StorageAccountConnectionString);
-            var containerClient = blobServiceClient.GetBlobContainerClient(StorageContainerName);
-            if (!await containerClient.ExistsAsync())
-                await containerClient.CreateAsync();
-
-            BlobClient blobClient = containerClient.GetBlobClient(fileName);
-
+            // Upload to blob
+            BlobClient client = new BlobClient(new Uri(uriSA), credentials);
             byte[] secretByteArray = Encoding.UTF8.GetBytes(secretJsonFormat);
             MemoryStream ms = new MemoryStream(secretByteArray);
-            await blobClient.UploadAsync(ms, true);
+            await client.UploadAsync(ms);
 
         }
         catch (Exception)
@@ -76,7 +93,43 @@ public class StorageService : IStorageService
     }
 
     // Stores the key in key vault
+    private async Task<bool> StorKeyInKeyVault(byte[] key, Guid id)
+    {
+        if (key == null)
+        {
+            throw new Exception("Key cannot be empty");
+        }
 
+        SecretClientOptions options = new SecretClientOptions()
+        {
+            Retry =
+            {
+                Delay= TimeSpan.FromSeconds(2),
+                MaxDelay = TimeSpan.FromSeconds(16),
+                MaxRetries = 5,
+                Mode = RetryMode.Exponential
+            }
+        };
+
+        string keyVaultName = "kvbastion"; // TODO: Add somewhere else? Will always be the same
+        string uri = $"https://{keyVaultName}.vault.azure.net";
+        string keyName = id.ToString();
+        string keyValue = Encoding.UTF8.GetString(key);
+
+        try
+        {
+            // TODO: Turn on MI for web app once launched in Azure
+            SecretClient client = new SecretClient(new Uri(uri), new DefaultAzureCredential(), options);
+            await client.SetSecretAsync(keyName, keyValue);
+        }
+        catch (Exception)
+        {
+            return false;
+            throw new Exception("Error uploading secret key");
+        }
+
+        return true;
+    }
 
 
     // Creates json string format for storage of secret in blob
