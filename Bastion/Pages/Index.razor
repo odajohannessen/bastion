@@ -42,8 +42,8 @@
 
 @code {
     private UserInputModel userInputModel = new();
-    private string encryptedString = "";
-    private string decryptedString = "";
+    private string encryptedString = "No value";
+    private string decryptedString = "No value";
 
     private async void HandleValidSubmit()
     {
@@ -61,31 +61,18 @@
 
             // Encrypt and store data 
             var response = await mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
-
-            if (response.ciphertextBytes is not null)
+            if (response.CiphertextBytes is not null)
             {
-                encryptedString = System.Text.Encoding.Default.GetString(response.ciphertextBytes);
+                encryptedString = Convert.ToBase64String(response.CiphertextBytes);
             }
             else
             {
                 encryptedString = "Failure";
             }
 
-            // Decrypt data for testing
-            // Replce with id
-            var responseDecrypt = await mediator.Send(new DecryptAndDeleteSecret.Request(response.ciphertextBytes, response.key, response.IV));
+            // Decrypt and display
+            var responseDecrypt = await mediator.Send(new DecryptAndDeleteSecret.Request(response.Id));
             decryptedString = responseDecrypt.Plaintext;
         }
-
-        // Process by creating a user object and a dto to send to Encryption domain? 
-        // TODO: Have code here or in separate file? 
-
-        // Display the encrypted secret for testing purposes
-        // Could we have a user input DTO func? 
-        // bool success;
-        // How do we utilize the service here? 
-
-        // TODO: Send userinput object to service with a request to payment service
-        // TODO: Do a pipeline for userinput object perhaps? 
     }
 }

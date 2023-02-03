@@ -2,15 +2,14 @@
 using Bastion.Core.Domain.Encryption;
 using Bastion.Core.Domain.Encryption.Services;
 using Bastion.Core.Domain.UserInputSecret.Dto;
-using Bastion.Core.Domain.Decryption.Pipelines; // For testing
-using Bastion.Core.Domain.Decryption.Services;
+using System.Text;
 
 namespace Bastion.Core.Domain.Encryption.Pipelines;
 
 public class EncryptAndSaveSecret
 {
     public record Request(UserInputDto userInputDto) : IRequest<Response>; 
-    public record Response(byte[] ciphertextBytes, byte[] key, byte[] IV);
+    public record Response(byte[] CiphertextBytes, byte[] Key, byte[] IV, string Id); // TODO: Remove Id after testing
 
     public class Handler : IRequestHandler<Request, Response>
     {
@@ -33,7 +32,7 @@ public class EncryptAndSaveSecret
             {
                 // Encrypt data
                 encryptionResponse = await EncryptionService.EncryptSecret(request.userInputDto.SecretPlaintext);
-                ciphertext = System.Text.Encoding.Default.GetString(encryptionResponse.Item1);
+                ciphertext = System.Convert.ToBase64String(encryptionResponse.Item1);
             }
             catch (Exception ex)
             {
@@ -51,22 +50,14 @@ public class EncryptAndSaveSecret
                 throw new Exception(ex.Message, ex);
             }
 
-            try
+            // Store secret and key
+            var storageResponse = await StorageService.StoreSecret(userSecret);
+            if (!storageResponse.Item1)
             {
-                // Store secret and key
-                var storageResponse = await StorageService.StoreSecret(userSecret);
-                // TODO: Return if false?
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
+                throw new Exception("Problems with storing");
             }
 
-            // TODO: Where should lifetime be stored? Separate blob id-lifetime name? 
-            // TODO: We also need to store key with secret ID in KV
-            // TODO: URL = guid 
-
-            return new Response(encryptionResponse.Item1, encryptionResponse.Item2, encryptionResponse.Item3); // TODO: Return bool, id/url
+            return new Response(encryptionResponse.Item1, encryptionResponse.Item2, encryptionResponse.Item3, userSecret.Id.ToString());
         }
     }
 

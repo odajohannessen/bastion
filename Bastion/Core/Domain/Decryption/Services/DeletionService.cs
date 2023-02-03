@@ -8,49 +8,42 @@ using Azure.Security.KeyVault.Secrets;
 using Azure.Core;
 using Azure.Storage.Blobs.Models;
 using Azure;
+using Bastion.Core.Domain.Encryption;
 
-namespace Bastion.Core.Domain.Encryption.Services;
+namespace Bastion.Core.Domain.Decryption.Services;
 
-public class StorageService : IStorageService
+public class DeletionService : IDeletionService
 {
-    public async Task<(bool, string)> StoreSecret(UserSecret userSecret)
+    public async Task<bool> DeleteSecret(string id)
     {
-        // Check input UserSecret
-        // TODO: Check other values? Valid timestamp etc?
-        if (userSecret == null)
+        if (id == "")
         {
-            return (false, "");
+            return false;
         }
 
-        // Secret format for storage
-        string jsonData = SecretStorageFormat(userSecret);
-
-        var successBlob = await StoreSecretInBlobStorage(jsonData, userSecret.Id);
-
+        // Delete secret from blob storage
+        var successBlob = await DeleteSecretFromBlobStorage(id);
         if (!successBlob)
         {
-            return (false, "");
+            return false;
         }
 
-        var successKey = await StorKeyInKeyVault(userSecret.Key, userSecret.Id);
-
+        // Delete key from key vault
+        var successKey = await DeleteKeyFromKeyVault(id);
         if (!successKey)
         {
-            return (false, "");
+            return false;
         }
 
-        // Return id on success for url generation
-        string id = userSecret.Id.ToString();
-
-        return (true, id); // TODO: Return id on success? 
+        return true; 
     }
 
-    // Stores the jsonData string in blob storage
-    private async Task<bool> StoreSecretInBlobStorage(string secretJsonFormat, Guid id)
+    // Delete secret from blob storage
+    private async Task<bool> DeleteSecretFromBlobStorage(string id)
     {
-        if (secretJsonFormat == null) 
+        if (id == null) 
         {
-            throw new Exception("Secret cannot be empty");
+            throw new Exception("Id cannot be empty");
         }
 
         // Key vault
@@ -79,12 +72,9 @@ public class StorageService : IStorageService
 
         try
         {
-            // Upload to blob
+            // Delete blob
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
-            byte[] secretByteArray = Encoding.UTF8.GetBytes(secretJsonFormat);
-            MemoryStream ms = new MemoryStream(secretByteArray);
-            await client.UploadAsync(ms);
-
+            await client.DeleteAsync();
         }
         catch (Exception)
         {
@@ -95,12 +85,12 @@ public class StorageService : IStorageService
         return true;
     }
 
-    // Stores the key in key vault
-    private async Task<bool> StorKeyInKeyVault(byte[] key, Guid id)
+    // Delete key from key vault
+    private async Task<bool> DeleteKeyFromKeyVault(string id)
     {
-        if (key == null)
+        if (id == null)
         {
-            throw new Exception("Key cannot be empty");
+            throw new Exception("Id cannot be empty");
         }
 
         SecretClientOptions options = new SecretClientOptions()
@@ -116,14 +106,12 @@ public class StorageService : IStorageService
 
         string keyVaultName = "kvbastion"; // TODO: Add somewhere else? Will always be the same
         string uri = $"https://{keyVaultName}.vault.azure.net";
-        string keyName = id.ToString();
-        string keyValue = Convert.ToBase64String(key);
 
         try
         {
             // TODO: Turn on MI for web app once launched in Azure
             SecretClient client = new SecretClient(new Uri(uri), new DefaultAzureCredential(), options);
-            await client.SetSecretAsync(keyName, keyValue);
+            await client.StartDeleteSecretAsync(id);
         }
         catch (Exception)
         {
@@ -134,14 +122,4 @@ public class StorageService : IStorageService
         return true;
     }
 
-
-    // Creates json string format for storage of secret in blob
-    public static string SecretStorageFormat(UserSecret userSecret)
-    {
-        // Exclude key from jsonData which is to be stored
-        UserSecretJsonFormat secretJsonFormat = new UserSecretJsonFormat(userSecret.Id, userSecret.Ciphertext, userSecret.Lifetime, userSecret.TimeStamp, userSecret.IV);
-        string jsonData = JsonConvert.SerializeObject(secretJsonFormat);
-
-        return jsonData;
-    }
 }

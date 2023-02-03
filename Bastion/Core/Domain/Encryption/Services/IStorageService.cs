@@ -4,5 +4,5 @@ namespace Bastion.Core.Domain.Encryption.Services;
 
 public interface IStorageService
 {
-    Task<bool> StoreSecret(UserSecret userSecret); // TODO: Return id on success? 
+    Task<(bool, string)> StoreSecret(UserSecret userSecret);
 }

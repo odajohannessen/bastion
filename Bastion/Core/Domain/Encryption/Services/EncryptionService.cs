@@ -62,7 +62,6 @@ public class EncryptionService : IEncryptionService
 
                 return (ciphertextBytes, aes.Key, aes.IV);
 
-                // TODO: Unit test for encrypt and decrypt
                 // TODO: Choice of key length? Performance vs security
             }
 

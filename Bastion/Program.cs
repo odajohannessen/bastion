@@ -15,6 +15,7 @@ builder.Services.AddSingleton<WeatherForecastService>(); // TODO: Remove
 builder.Services.AddTransient<IEncryptionService, EncryptionService>();
 builder.Services.AddTransient<IDecryptionService, DecryptionService>();
 builder.Services.AddTransient<IStorageService, StorageService>();
+builder.Services.AddTransient<IDeletionService, DeletionService>();
 builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
