@@ -15,16 +15,19 @@ public class EncryptAndSaveSecret
     public class Handler : IRequestHandler<Request, Response>
     {
         public IEncryptionService EncryptionService;
+        public IStorageService StorageService;
 
-        public Handler(IEncryptionService encryptionService) 
+        public Handler(IEncryptionService encryptionService, IStorageService storageService) 
         {
             EncryptionService = encryptionService;
+            StorageService = storageService;
         }
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
             (byte[], byte[], byte[]) encryptionResponse;
             string ciphertext;
+            UserSecret userSecret;
 
             try
             {
@@ -41,15 +44,24 @@ public class EncryptAndSaveSecret
             try
             {
                 UserInputDto userInputDto = request.userInputDto;
-                UserSecret userSecret = new UserSecret(userInputDto.Id, ciphertext, userInputDto.Lifetime, userInputDto.TimesStamp, encryptionResponse.Item2, encryptionResponse.Item3);
+                userSecret = new UserSecret(userInputDto.Id, ciphertext, userInputDto.Lifetime, userInputDto.TimesStamp, encryptionResponse.Item2, encryptionResponse.Item3);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
             }
 
-            // TODO: Implement storage service 
-            // TODO: Call on storage service here. Secret ID is blob name
+            try
+            {
+                // Store secret and key
+                var storageResponse = await StorageService.StoreSecret(userSecret);
+                // TODO: Return if false?
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+
             // TODO: Where should lifetime be stored? Separate blob id-lifetime name? 
             // TODO: We also need to store key with secret ID in KV
             // TODO: URL = guid 

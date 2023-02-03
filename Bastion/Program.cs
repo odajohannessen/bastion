@@ -11,9 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddSingleton<WeatherForecastService>(); // TODO: Remove
 builder.Services.AddTransient<IEncryptionService, EncryptionService>();
 builder.Services.AddTransient<IDecryptionService, DecryptionService>();
+builder.Services.AddTransient<IStorageService, StorageService>();
 builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
