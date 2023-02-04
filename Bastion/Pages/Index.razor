@@ -8,6 +8,7 @@
 @using Bastion.Core.Domain.Encryption.Pipelines;
 @using Bastion.Core.Domain.Decryption;
 @using Bastion.Core.Domain.Decryption.Pipelines;
+@using Bastion.Models;
 
 <PageTitle>Bastion</PageTitle>
 
@@ -33,22 +34,20 @@
 
 <br/>
 
-<h1>Display encrypted secret and lifetime here</h1>
-<div>@encryptedString</div>
-<h1>Display decrypted secret here</h1>
-<div>@decryptedString</div>
+<h1>Url id</h1>
+<div>@id</div>
 
 @*<SurveyPrompt Title="How is Blazor working for you?" /> *@
 
 @code {
     private UserInputModel userInputModel = new();
-    private string encryptedString = "No value";
-    private string decryptedString = "No value";
+    private Guid id = default;
 
     private async void HandleValidSubmit()
     {
         Logger.LogInformation("HandleSubmit called");
 
+        // Create user input
         var responseInput = await mediator.Send(new CreateUserInput.Request(userInputModel.SecretPlaintext, userInputModel.Lifetime));
 
         if (responseInput.success)
@@ -57,22 +56,16 @@
 
             // Create UserInputDto
             UserInput userInput = responseInput.userInput;
+            id = userInput.Id;
+            // TODO: Add if statement for showing url id, don't show when default value
             UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.Plaintext, userInput.Lifetime);
 
             // Encrypt and store data 
-            var response = await mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
-            if (response.CiphertextBytes is not null)
-            {
-                encryptedString = Convert.ToBase64String(response.CiphertextBytes);
-            }
-            else
-            {
-                encryptedString = "Failure";
-            }
+            var response = mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
 
-            // Decrypt and display
-            var responseDecrypt = await mediator.Send(new DecryptAndDeleteSecret.Request(response.Id));
-            decryptedString = responseDecrypt.Plaintext;
+            // TODO: In other page, Decrypt and display
+            //var responseDecrypt = await mediator.Send(new DecryptAndDeleteSecret.Request(response.Id));
+            //decryptedString = responseDecrypt.Plaintext;
         }
     }
 }
