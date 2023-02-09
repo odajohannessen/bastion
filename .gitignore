@@ -10,6 +10,10 @@ local.settings.json
 *.userosscache
 *.sln.docstates
 
+# PublishProfiles
+*.pubxml
+*.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
