@@ -9,6 +9,7 @@ using Azure.Core;
 using Azure.Storage.Blobs.Models;
 using Azure;
 using Bastion.Core.Domain.Encryption;
+using Bastion.Helpers;
 
 namespace Bastion.Core.Domain.Decryption.Services;
 
@@ -46,30 +47,13 @@ public class DeletionService : IDeletionService
             throw new Exception("Id cannot be empty");
         }
 
-        // Key vault
-        string keyVaultName = "kvbastion";
-        string secretName = "userAssignedClientId";
-        var uriKV = $"https://{keyVaultName}.vault.azure.net/";
-        
         // Storage container
         string StorageContainerName = "secrets-test";
         string StorageAccountName = "sabastion";
         string blobName = $"{id}.json";
         string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
-        // Get User assigned client ID from key vault (through SA MI between web app and key vault)
-        SecretClient secretClient = new SecretClient(new Uri(uriKV), new DefaultAzureCredential());
-        Response<KeyVaultSecret> secret = secretClient.GetSecret(secretName);
-        string userAssignedClientId = secret.Value.Value.ToString();
-
-        var options = new DefaultAzureCredentialOptions
-        {
-            ExcludeEnvironmentCredential = true,
-            ExcludeManagedIdentityCredential = false,
-            ManagedIdentityClientId = userAssignedClientId,
-        };
-        var credentials = new DefaultAzureCredential();
-
+        var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
         try
         {
             // Delete blob
@@ -109,8 +93,8 @@ public class DeletionService : IDeletionService
 
         try
         {
-            // TODO: Turn on MI for web app once launched in Azure
-            SecretClient client = new SecretClient(new Uri(uri), new DefaultAzureCredential(), options);
+            var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
+            SecretClient client = new SecretClient(new Uri(uri), credentials, options);
             await client.StartDeleteSecretAsync(id);
         }
         catch (Exception)

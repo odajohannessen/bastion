@@ -8,6 +8,7 @@ using Azure.Security.KeyVault.Secrets;
 using Azure.Core;
 using Azure.Storage.Blobs.Models;
 using Azure;
+using Bastion.Helpers;
 
 namespace Bastion.Core.Domain.Encryption.Services;
 
@@ -53,37 +54,13 @@ public class StorageService : IStorageService
             throw new Exception("Secret cannot be empty");
         }
 
-        // Key vault
-        string keyVaultName = "kvbastion";
-        string secretName = "userAssignedClientId";
-        var uriKV = $"https://{keyVaultName}.vault.azure.net/";
-        
         // Storage container
         string StorageContainerName = "secrets-test";
         string StorageAccountName = "sabastion";
-        string blobName = $"{id}.json";
+        string blobName = $"{id}.json"; // TODO: Update blob name to include time stamp 
         string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
-        // Get User assigned client ID from key vault (through SA MI between web app and key vault)
-        SecretClient secretClient = new SecretClient(new Uri(uriKV), new DefaultAzureCredential());
-        Response<KeyVaultSecret> secret = secretClient.GetSecret(secretName);
-        string userAssignedClientId = secret.Value.Value.ToString();
-
-        // Exclude options to decrease time spent checking options
-        var options = new DefaultAzureCredentialOptions
-        {
-            ExcludeEnvironmentCredential = true,
-            ExcludeManagedIdentityCredential = false, // Set to false for deploy, true for local testing
-            ExcludeSharedTokenCacheCredential = true,
-            ExcludeVisualStudioCodeCredential = true,
-            ExcludeVisualStudioCredential = true,
-            ExcludeAzureCliCredential = true, // Change to false for local testing
-            ExcludeAzurePowerShellCredential = true,
-            ExcludeInteractiveBrowserCredential = true,
-            ManagedIdentityClientId = userAssignedClientId,
-        };
-        var credentials = new DefaultAzureCredential();
-
+        var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
         try
         {
             // Upload to blob
@@ -121,15 +98,15 @@ public class StorageService : IStorageService
             }
         };
 
-        string keyVaultName = "kvbastion"; // TODO: Add somewhere else? Will always be the same
+        string keyVaultName = "kvbastion";
         string uri = $"https://{keyVaultName}.vault.azure.net";
         string keyName = id.ToString();
         string keyValue = Convert.ToBase64String(key);
 
         try
         {
-            // TODO: Turn on MI for web app once launched in Azure
-            SecretClient client = new SecretClient(new Uri(uri), new DefaultAzureCredential(), options);
+            var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
+            SecretClient client = new SecretClient(new Uri(uri), credentials, options);
             await client.SetSecretAsync(keyName, keyValue);
         }
         catch (Exception)
