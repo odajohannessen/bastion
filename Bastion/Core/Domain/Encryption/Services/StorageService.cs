@@ -69,10 +69,17 @@ public class StorageService : IStorageService
         Response<KeyVaultSecret> secret = secretClient.GetSecret(secretName);
         string userAssignedClientId = secret.Value.Value.ToString();
 
+        // Exclude options to decrease time spent checking options
         var options = new DefaultAzureCredentialOptions
         {
             ExcludeEnvironmentCredential = true,
-            ExcludeManagedIdentityCredential = false,
+            ExcludeManagedIdentityCredential = false, // Set to false for deploy, true for local testing
+            ExcludeSharedTokenCacheCredential = true,
+            ExcludeVisualStudioCodeCredential = true,
+            ExcludeVisualStudioCredential = true,
+            ExcludeAzureCliCredential = true, // Change to false for local testing
+            ExcludeAzurePowerShellCredential = true,
+            ExcludeInteractiveBrowserCredential = true,
             ManagedIdentityClientId = userAssignedClientId,
         };
         var credentials = new DefaultAzureCredential();
