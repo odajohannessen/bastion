@@ -62,10 +62,6 @@
 
             // Encrypt and store data 
             var response = mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
-
-            // TODO: In other page, Decrypt and display
-            //var responseDecrypt = await mediator.Send(new DecryptAndDeleteSecret.Request(response.Id));
-            //decryptedString = responseDecrypt.Plaintext;
         }
     }
 }
