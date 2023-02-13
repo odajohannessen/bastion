@@ -68,7 +68,6 @@ public class StorageService : IStorageService
             byte[] secretByteArray = Encoding.UTF8.GetBytes(secretJsonFormat);
             MemoryStream ms = new MemoryStream(secretByteArray);
             await client.UploadAsync(ms);
-
         }
         catch (Exception)
         {

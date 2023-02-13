@@ -5,6 +5,8 @@ using MediatR;
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Azure.Identity;
+using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,7 @@ builder.Services.AddTransient<IDecryptionService, DecryptionService>();
 builder.Services.AddTransient<IStorageService, StorageService>();
 builder.Services.AddTransient<IDeletionService, DeletionService>();
 builder.Services.AddMediatR(typeof(Program));
+//builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 
 var app = builder.Build();
 

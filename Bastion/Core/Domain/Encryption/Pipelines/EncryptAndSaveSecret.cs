@@ -15,15 +15,19 @@ public class EncryptAndSaveSecret
     {
         public IEncryptionService EncryptionService;
         public IStorageService StorageService;
+        //public readonly ILogger _logger;
 
-        public Handler(IEncryptionService encryptionService, IStorageService storageService) 
+        public Handler(IEncryptionService encryptionService, IStorageService storageService)//, ILogger logger) 
         {
             EncryptionService = encryptionService;
             StorageService = storageService;
+            //_logger = logger;
         }
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
+            //_logger.LogInformation("Starting handling of request for encrypting and saving secret.");
+
             (byte[], byte[], byte[]) encryptionResponse;
             string ciphertext;
             UserSecret userSecret;

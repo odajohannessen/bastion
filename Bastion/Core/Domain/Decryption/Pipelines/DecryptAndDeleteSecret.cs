@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Text;
 using System.Security.Cryptography.Xml;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Bastion.Helpers;
 
 namespace Bastion.Core.Domain.Decryption.Pipelines;
 
@@ -45,30 +46,13 @@ public class DecryptAndDeleteSecret
             
             try
             {
-                // Get secret and key from storage
-                // Key vault
-                string keyVaultName = "kvbastion";
-                string secretName = "userAssignedClientId";
-                var uriKV = $"https://{keyVaultName}.vault.azure.net/";
-
                 // Storage container
                 string StorageContainerName = "secrets-test";
                 string StorageAccountName = "sabastion";
                 string blobName = $"{request.Id}.json";
                 string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
-                // Get User assigned client ID from key vault (through SA MI between web app and key vault)
-                SecretClient secretClient = new SecretClient(new Uri(uriKV), new DefaultAzureCredential());
-                Response<KeyVaultSecret> secret = secretClient.GetSecret(secretName);
-                string userAssignedClientId = secret.Value.Value.ToString();
-
-                var options = new DefaultAzureCredentialOptions
-                {
-                    ExcludeEnvironmentCredential = true,
-                    ExcludeManagedIdentityCredential = false,
-                    ManagedIdentityClientId = userAssignedClientId,
-                };
-                var credentials = new DefaultAzureCredential();
+                var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
                 // Get blob
                 BlobClient client = new BlobClient(new Uri(uriSA), credentials);
@@ -83,15 +67,11 @@ public class DecryptAndDeleteSecret
                     throw new Exception("Error deserializing");
                 }
                 ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
-  
-                // Get key from key vault
-                SecretClient secretClientKey = new SecretClient(new Uri(uriKV), new DefaultAzureCredential());
-                Response<KeyVaultSecret> secretKey = secretClient.GetSecret(request.Id);
-                var name = secretKey.Value.Value;
-                var valueString = secretKey.Value.Value.ToString();
-                secretKeyValue = Convert.FromBase64String(secretKey.Value.Value.ToString());
-                //secretKeyValue = Encoding.UTF8.GetString(base64EncodedBytes);
 
+                // Get key from key vault
+                string secretKey = GetSecretFromKeyVaultHelper.GetSecret(request.Id);
+                secretKeyValue = Convert.FromBase64String(secretKey);
+                // secretKeyValue = Encoding.UTF8.GetString(base64EncodedBytes);
                 //secretKeyValue = System.Text.Encoding.Default.GetBytes(secretKey.Value.Value);
             }
             catch (Exception ex) 

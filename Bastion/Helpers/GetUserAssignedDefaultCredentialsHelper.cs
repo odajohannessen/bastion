@@ -15,11 +15,11 @@ public class GetUserAssignedDefaultCredentialsHelper
             ExcludeManagedIdentityCredential = false, // Set to false for deploy, true for local testing
             ExcludeSharedTokenCacheCredential = true,
             ExcludeVisualStudioCodeCredential = true,
-            ExcludeVisualStudioCredential = true,
-            ExcludeAzureCliCredential = true, // Change to false for local testing
+            ExcludeVisualStudioCredential = true, // Change to false for local testing
+            ExcludeAzureCliCredential = true,
             ExcludeAzurePowerShellCredential = true,
             ExcludeInteractiveBrowserCredential = true,
-            ManagedIdentityClientId = userAssignedClientId,
+            ManagedIdentityClientId = userAssignedClientId, // Comment out during testing
         };
         var credentials = new DefaultAzureCredential(options);
         return credentials;
