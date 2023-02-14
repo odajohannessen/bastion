@@ -12,6 +12,7 @@ using System.Text;
 using System.Security.Cryptography.Xml;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Bastion.Helpers;
+using Bastion.Managers;
 
 namespace Bastion.Core.Domain.Decryption.Pipelines;
 
@@ -24,15 +25,20 @@ public class DecryptAndDeleteSecret
     {
         public IDecryptionService DecryptionService;
         public IDeletionService DeletionService;
+        public LoggingManager logging;
 
-        public Handler(IDecryptionService decryptionService, IDeletionService deletionService)
+        public Handler(IDecryptionService decryptionService, IDeletionService deletionService, LoggingManager loggingManager)
         {
             DecryptionService = decryptionService;
             DeletionService = deletionService;
+            logging = loggingManager;
         }
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
+            logging.LogEvent("A request to access a secret by an anonymous user has been received.");
+            logging.LogEvent("Starting handling of request for decrypting and deleting secret.");
+
             if (request.Id == null)
             {
                 throw new Exception("Id cannot be empty");
@@ -50,6 +56,7 @@ public class DecryptAndDeleteSecret
             // Check if id exists in key vault
             if (secretKey == "Secret not found")
             {
+                logging.LogException("Secret does dot exist in key vault");
                 return new Response(success, secretKey);
             }
 
@@ -75,6 +82,7 @@ public class DecryptAndDeleteSecret
             }
             catch
             {
+                logging.LogException("Secret does dot exist in blob storage");
                 return new Response(success, "Blob not found");
             }
             string jsonData = Encoding.ASCII.GetString(ms.ToArray());
@@ -92,6 +100,11 @@ public class DecryptAndDeleteSecret
 
             // Delete secret and key
             success = await DeletionService.DeleteSecret(request.Id);
+
+            if (success) 
+            {
+                logging.LogEvent("Secret succesfully accessed by anonymous user and deleted from storage.");
+            }
 
             return new Response(success, plaintext);
 

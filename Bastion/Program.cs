@@ -1,6 +1,7 @@
 using Bastion.Core; 
 using Bastion.Core.Domain.Encryption.Services;
 using Bastion.Core.Domain.Decryption.Services;
+using Bastion.Managers;
 using MediatR;
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
@@ -17,6 +18,8 @@ builder.Services.AddTransient<IEncryptionService, EncryptionService>();
 builder.Services.AddTransient<IDecryptionService, DecryptionService>();
 builder.Services.AddTransient<IStorageService, StorageService>();
 builder.Services.AddTransient<IDeletionService, DeletionService>();
+builder.Services.AddTransient<LoggingManager>();
+
 builder.Services.AddMediatR(typeof(Program));
 //builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 

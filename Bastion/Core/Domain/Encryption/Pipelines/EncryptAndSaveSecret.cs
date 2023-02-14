@@ -2,6 +2,7 @@
 using Bastion.Core.Domain.Encryption;
 using Bastion.Core.Domain.Encryption.Services;
 using Bastion.Core.Domain.UserInputSecret.Dto;
+using Bastion.Managers;
 using System.Text;
 
 namespace Bastion.Core.Domain.Encryption.Pipelines;
@@ -15,18 +16,19 @@ public class EncryptAndSaveSecret
     {
         public IEncryptionService EncryptionService;
         public IStorageService StorageService;
-        //public readonly ILogger _logger;
+        public LoggingManager logging;
 
-        public Handler(IEncryptionService encryptionService, IStorageService storageService)//, ILogger logger) 
+        public Handler(IEncryptionService encryptionService, IStorageService storageService, LoggingManager loggingManager)
         {
             EncryptionService = encryptionService;
             StorageService = storageService;
-            //_logger = logger;
+            logging = loggingManager;
         }
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
-            //_logger.LogInformation("Starting handling of request for encrypting and saving secret.");
+            logging.LogEvent("A request to create a secret for an anonymous user has been received.");
+            logging.LogEvent("Starting handling of request for encrypting and saving secret.");
 
             (byte[], byte[], byte[]) encryptionResponse;
             string ciphertext;
@@ -37,6 +39,8 @@ public class EncryptAndSaveSecret
                 // Encrypt data
                 encryptionResponse = await EncryptionService.EncryptSecret(request.userInputDto.SecretPlaintext);
                 ciphertext = System.Convert.ToBase64String(encryptionResponse.Item1);
+                logging.LogTrace("Secret succesfully encrypted.");
+
             }
             catch (Exception ex)
             {
@@ -58,8 +62,10 @@ public class EncryptAndSaveSecret
             var storageResponse = await StorageService.StoreSecret(userSecret);
             if (!storageResponse.Item1)
             {
+                logging.LogException("Storage of secret failed");
                 throw new Exception("Problems with storing");
             }
+            logging.LogEvent("Secret succesfully stored for anonymous user.");
 
             return new Response(encryptionResponse.Item1, encryptionResponse.Item2, encryptionResponse.Item3, userSecret.Id.ToString());
         }
