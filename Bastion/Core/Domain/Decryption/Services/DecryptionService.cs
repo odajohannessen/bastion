@@ -7,7 +7,7 @@ public class DecryptionService : IDecryptionService
     public async Task<string> DecryptSecret(byte[] ciphertextBytes, byte[] key, byte[] IV) // TODO: Does this need to be a task?
     {
         // TODO: Should we implement some logging here? Security risks? 
-        // TODO: Where to store logs? Blob? 
+        // TODO: Where to store logs? AppInsight?
         // TODO: Which Aes class to use? Gcm? Cng? Document choice
 
         string plaintext = DecryptStringFromBytes(ciphertextBytes, key, IV);

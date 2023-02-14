@@ -15,7 +15,7 @@ public class GetUserAssignedDefaultCredentialsHelper
             ExcludeManagedIdentityCredential = false, // Set to false for deploy, true for local testing
             ExcludeSharedTokenCacheCredential = true,
             ExcludeVisualStudioCodeCredential = true,
-            ExcludeVisualStudioCredential = true, // Change to false for local testing
+            ExcludeVisualStudioCredential = true, // Set to true for deploy, false for local testing
             ExcludeAzureCliCredential = true,
             ExcludeAzurePowerShellCredential = true,
             ExcludeInteractiveBrowserCredential = true,

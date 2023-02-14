@@ -43,62 +43,55 @@ public class DecryptAndDeleteSecret
             byte[] ciphertext;
             byte[] secretKeyValue;
             UserSecretJsonFormat userSecret;
-            
+
+            // Get key from key vault
+            string secretKey = GetSecretFromKeyVaultHelper.GetSecret(request.Id);
+
+            // Check if id exists in key vault
+            if (secretKey == "Secret not found")
+            {
+                return new Response(success, secretKey);
+            }
+
+            // Convert if it exists
+            secretKeyValue = Convert.FromBase64String(secretKey);
+            // secretKeyValue = Encoding.UTF8.GetString(base64EncodedBytes);
+            //secretKeyValue = System.Text.Encoding.Default.GetBytes(secretKey.Value.Value);
+                
+            // Storage container
+            string StorageContainerName = "secrets-test";
+            string StorageAccountName = "sabastion";
+            string blobName = $"{request.Id}.json";
+            string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
+
+            var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
+
+            // Get blob
+            BlobClient client = new BlobClient(new Uri(uriSA), credentials);
+            MemoryStream ms = new MemoryStream();
             try
             {
-                // Storage container
-                string StorageContainerName = "secrets-test";
-                string StorageAccountName = "sabastion";
-                string blobName = $"{request.Id}.json";
-                string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
-
-                var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
-
-                // Get blob
-                BlobClient client = new BlobClient(new Uri(uriSA), credentials);
-                MemoryStream ms = new MemoryStream();
                 await client.DownloadToAsync(ms);
-                string jsonData = Encoding.ASCII.GetString(ms.ToArray());
-
-                // Convert to userSecret format
-                userSecret = JsonConvert.DeserializeObject<UserSecretJsonFormat>(jsonData);
-                if (userSecret == null)
-                {
-                    throw new Exception("Error deserializing");
-                }
-                ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
-
-                // Get key from key vault
-                string secretKey = GetSecretFromKeyVaultHelper.GetSecret(request.Id);
-                secretKeyValue = Convert.FromBase64String(secretKey);
-                // secretKeyValue = Encoding.UTF8.GetString(base64EncodedBytes);
-                //secretKeyValue = System.Text.Encoding.Default.GetBytes(secretKey.Value.Value);
             }
-            catch (Exception ex) 
+            catch
             {
-                throw new Exception(ex.Message, ex);
+                return new Response(success, "Blob not found");
             }
+            string jsonData = Encoding.ASCII.GetString(ms.ToArray());
+
+            // Convert to userSecret format
+            userSecret = JsonConvert.DeserializeObject<UserSecretJsonFormat>(jsonData);
+            if (userSecret == null)
+            {
+                throw new Exception("Error deserializing");
+            }
+            ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
 
             // Decrypt secret
-            try
-            {
-                plaintext = await DecryptionService.DecryptSecret(ciphertext, secretKeyValue , userSecret.IV); 
-
-            }
-            catch (Exception)
-            {
-                throw new Exception("Error decrypting secret");
-            }
+            plaintext = await DecryptionService.DecryptSecret(ciphertext, secretKeyValue , userSecret.IV); 
 
             // Delete secret and key
-            try
-            {
-                success = await DeletionService.DeleteSecret(request.Id);
-            }
-            catch (Exception)
-            {
-                throw new Exception("Error deleting secret");
-            }
+            success = await DeletionService.DeleteSecret(request.Id);
 
             return new Response(success, plaintext);
 
