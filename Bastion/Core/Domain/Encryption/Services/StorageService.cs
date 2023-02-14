@@ -17,23 +17,22 @@ public class StorageService : IStorageService
     public async Task<(bool, string)> StoreSecret(UserSecret userSecret)
     {
         // Check input UserSecret
-        // TODO: Check other values? Valid timestamp etc?
         if (userSecret == null)
         {
             return (false, "");
         }
 
         // Secret format for storage
-        string jsonData = SecretStorageFormat(userSecret);
+        string secretJsonFormat = SecretStorageFormat(userSecret);
 
-        var successBlob = await StoreSecretInBlobStorage(jsonData, userSecret.Id);
+        var successBlob = await StoreSecretInBlobStorage(secretJsonFormat, userSecret);
 
         if (!successBlob)
         {
             return (false, "");
         }
 
-        var successKey = await StorKeyInKeyVault(userSecret.Key, userSecret.Id);
+        var successKey = await StorKeyInKeyVault(userSecret);
 
         if (!successKey)
         {
@@ -43,13 +42,13 @@ public class StorageService : IStorageService
         // Return id on success for url generation
         string id = userSecret.Id.ToString();
 
-        return (true, id); // TODO: Return id on success? 
+        return (true, id);
     }
 
     // Stores the jsonData string in blob storage
-    private async Task<bool> StoreSecretInBlobStorage(string secretJsonFormat, Guid id)
+    private async Task<bool> StoreSecretInBlobStorage(string secretJsonFormat, UserSecret userSecret)
     {
-        if (secretJsonFormat == null) 
+        if (secretJsonFormat == null || userSecret == null) 
         {
             throw new Exception("Secret cannot be empty");
         }
@@ -57,7 +56,7 @@ public class StorageService : IStorageService
         // Storage container
         string StorageContainerName = "secrets-test";
         string StorageAccountName = "sabastion";
-        string blobName = $"{id}.json"; // TODO: Update blob name to include time stamp 
+        string blobName = userSecret.Id.ToString() + "--" + userSecret.TimeStamp.ToString("yyyy-MM-ddTHH:mm:ssK") + ".json";
         string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
@@ -79,11 +78,11 @@ public class StorageService : IStorageService
     }
 
     // Stores the key in key vault
-    private async Task<bool> StorKeyInKeyVault(byte[] key, Guid id)
+    private async Task<bool> StorKeyInKeyVault(UserSecret userSecret)
     {
-        if (key == null)
+        if (userSecret == null || userSecret.Key == null)
         {
-            throw new Exception("Key cannot be empty");
+            throw new Exception("User secret or key cannot be empty");
         }
 
         SecretClientOptions options = new SecretClientOptions()
@@ -99,8 +98,8 @@ public class StorageService : IStorageService
 
         string keyVaultName = "kvbastion";
         string uri = $"https://{keyVaultName}.vault.azure.net";
-        string keyName = id.ToString();
-        string keyValue = Convert.ToBase64String(key);
+        string keyName = userSecret.Id.ToString(); // Key vault naming convention does not allow datetime format in string, only using id here
+        string keyValue = Convert.ToBase64String(userSecret.Key);
 
         try
         {

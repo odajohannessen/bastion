@@ -15,15 +15,15 @@ namespace Bastion.Core.Domain.Decryption.Services;
 
 public class DeletionService : IDeletionService
 {
-    public async Task<bool> DeleteSecret(string id)
+    public async Task<bool> DeleteSecret(string id, string blobName)
     {
-        if (id == "")
+        if (id == null || blobName == null)
         {
             return false;
         }
 
         // Delete secret from blob storage
-        var successBlob = await DeleteSecretFromBlobStorage(id);
+        var successBlob = await DeleteSecretFromBlobStorage(blobName);
         if (!successBlob)
         {
             return false;
@@ -40,17 +40,11 @@ public class DeletionService : IDeletionService
     }
 
     // Delete secret from blob storage
-    private async Task<bool> DeleteSecretFromBlobStorage(string id)
+    private async Task<bool> DeleteSecretFromBlobStorage(string blobName)
     {
-        if (id == null) 
-        {
-            throw new Exception("Id cannot be empty");
-        }
-
         // Storage container
         string StorageContainerName = "secrets-test";
         string StorageAccountName = "sabastion";
-        string blobName = $"{id}.json";
         string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
@@ -72,11 +66,6 @@ public class DeletionService : IDeletionService
     // Delete key from key vault
     private async Task<bool> DeleteKeyFromKeyVault(string id)
     {
-        if (id == null)
-        {
-            throw new Exception("Id cannot be empty");
-        }
-
         SecretClientOptions options = new SecretClientOptions()
         {
             Retry =
@@ -99,8 +88,8 @@ public class DeletionService : IDeletionService
         }
         catch (Exception)
         {
+            // TODO: add logging
             return false;
-            throw new Exception("Error uploading secret key");
         }
 
         return true;

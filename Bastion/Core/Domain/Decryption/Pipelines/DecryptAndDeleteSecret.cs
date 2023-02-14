@@ -13,6 +13,7 @@ using System.Security.Cryptography.Xml;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Bastion.Helpers;
 using Bastion.Managers;
+using Azure.Storage.Blobs.Models;
 
 namespace Bastion.Core.Domain.Decryption.Pipelines;
 
@@ -60,20 +61,32 @@ public class DecryptAndDeleteSecret
                 return new Response(success, secretKey);
             }
 
-            // Convert if it exists
+            // Convert key 
             secretKeyValue = Convert.FromBase64String(secretKey);
-            // secretKeyValue = Encoding.UTF8.GetString(base64EncodedBytes);
-            //secretKeyValue = System.Text.Encoding.Default.GetBytes(secretKey.Value.Value);
-                
-            // Storage container
-            string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastion";
-            string blobName = $"{request.Id}.json";
-            string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
+            // Get list of blobs from storage container
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
+            string StorageContainerName = "secrets-test";
+            string StorageAccountName = "sabastion";
+            string uriContainer = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}";
+            string blobName = "";
+
+            BlobContainerClient containerClient = new BlobContainerClient(new Uri(uriContainer), credentials);
+            var blobItems = containerClient.GetBlobs();
+
+            foreach (BlobItem blobItem in blobItems)
+            {
+                // Check if file name contains the secret id
+                if (blobItem.Name.Contains(request.Id))
+                {
+                    blobName = blobItem.Name;
+                    break;
+                }
+            }
+
             // Get blob
+            string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
             MemoryStream ms = new MemoryStream();
             try
@@ -96,10 +109,10 @@ public class DecryptAndDeleteSecret
             ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
 
             // Decrypt secret
-            plaintext = await DecryptionService.DecryptSecret(ciphertext, secretKeyValue , userSecret.IV); 
+            plaintext = await DecryptionService.DecryptSecret(ciphertext, secretKeyValue, userSecret.IV); 
 
             // Delete secret and key
-            success = await DeletionService.DeleteSecret(request.Id);
+            success = await DeletionService.DeleteSecret(request.Id, blobName);
 
             if (success) 
             {
