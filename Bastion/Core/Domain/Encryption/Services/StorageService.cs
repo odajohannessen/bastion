@@ -56,7 +56,7 @@ public class StorageService : IStorageService
         // Storage container
         string StorageContainerName = "secrets-test";
         string StorageAccountName = "sabastion";
-        string blobName = userSecret.Id.ToString() + "--" + userSecret.TimeStamp.ToString("yyyy-MM-ddTHH:mm:ssK") + ".json";
+        string blobName = userSecret.Id.ToString() + "--" + userSecret.ExpireTimeStamp.ToString("yyyy-MM-ddTHH:mm:ssK") + ".json";
         string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();

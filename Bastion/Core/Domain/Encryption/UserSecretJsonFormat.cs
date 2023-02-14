@@ -6,14 +6,16 @@ public class UserSecretJsonFormat
     {
         Id = id;
         TimeStamp = timeStamp;
-        Ciphertext = ciphertext; // TODO: Change this to byte[]?
         Lifetime = inputLifetime;
+        ExpireTimeStamp = timeStamp.AddHours(inputLifetime);
+        Ciphertext = ciphertext; // TODO: Change this to byte[]?
         IV = iv;
     }
 
-    public Guid Id { get; protected set; } // TODO: Do we need to worry about how this is randomly set? Protected get? 
+    public Guid Id { get; protected set; } 
     public DateTime TimeStamp { get; protected set; }
-    public string Ciphertext { get; protected set; } // TODO: Protected get and protected set? 
-    public int Lifetime { get; protected set; } // TODO: Protected get and protected set
+    public int Lifetime { get; protected set; } 
+    public DateTime ExpireTimeStamp { get; protected set; }
+    public string Ciphertext { get; protected set; } 
     public byte[] IV { get; protected set; }
 }
