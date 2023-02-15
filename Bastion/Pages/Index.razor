@@ -34,34 +34,36 @@
 
 <br/>
 
-<h1>Url id</h1>
-<div>@id</div>
-
-@*<SurveyPrompt Title="How is Blazor working for you?" /> *@
+<h1>Copy the URL to share your encrypted secret</h1
+@if (id != Guid.Empty)
+{
+    <div>@url</div>
+}
 
 @code {
     private UserInputModel userInputModel = new();
     private Guid id = default;
+    private string url = $"https://bastion-bouvet.azurewebsites.net/";
 
     private async void HandleValidSubmit()
     {
-        Logger.LogInformation("HandleSubmit called");
-
         // Create user input
         var responseInput = await mediator.Send(new CreateUserInput.Request(userInputModel.SecretPlaintext, userInputModel.Lifetime));
 
         if (responseInput.success)
         {
-            Logger.LogInformation("UserInput created");
-
             // Create UserInputDto
             UserInput userInput = responseInput.userInput;
             id = userInput.Id;
-            // TODO: Add if statement for showing url id, don't show when default value
+            url = $"https://bastion-bouvet.azurewebsites.net/{id.ToString()}";
+
             UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.Plaintext, userInput.Lifetime);
 
             // Encrypt and store data 
             var response = mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
+
+            // TODO: Sett grense på 24 t: choice: 1 hour, 4 hours, 24 hours?
+
         }
     }
 }

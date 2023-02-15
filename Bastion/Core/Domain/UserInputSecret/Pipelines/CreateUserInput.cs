@@ -12,7 +12,7 @@ public class CreateUserInput
 
     public class Handler : IRequestHandler<Request, Response> 
     {
-        public async Task<Response> Handle(Request request, CancellationToken cancellationToken) // TODO: What do we need cancellation token for? 
+        public async Task<Response> Handle(Request request, CancellationToken cancellationToken)  
         {
             try
             {

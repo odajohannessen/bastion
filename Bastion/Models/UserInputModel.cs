@@ -6,7 +6,7 @@ namespace Bastion.Models;
 public class UserInputModel : PageModel
 {
     [Required]
-    //[StringLength(1, ErrorMessage = "Too long plaintext")] // TODO: Need an upper limit?
+    [StringLength(5000, ErrorMessage = "Message is too long")]
     public string SecretPlaintext { get; set; } = "";
 
     [Required]

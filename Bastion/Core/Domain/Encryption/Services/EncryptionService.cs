@@ -4,11 +4,8 @@ namespace Bastion.Core.Domain.Encryption.Services;
 
 public class EncryptionService : IEncryptionService
 {
-    public async Task<(byte[], byte[], byte[])> EncryptSecret(string plaintext) // TODO: Does this need to be a task?
+    public async Task<(byte[], byte[], byte[])> EncryptSecret(string plaintext) 
     {
-        // TODO: Should we implement some logging here? Security risks? 
-        // TODO: Where to store logs? Blob? 
-        // TODO: Which Aes class to use? Gcm? Cng? Document choice
         using (Aes aes = Aes.Create())
         {
             var encryptionResponse = EncryptStringToBytes(plaintext, aes.Key, aes.IV);
@@ -62,7 +59,6 @@ public class EncryptionService : IEncryptionService
 
                 return (ciphertextBytes, aes.Key, aes.IV);
 
-                // TODO: Choice of key length? Performance vs security
             }
 
         }

@@ -8,7 +8,7 @@ public class UserSecretJsonFormat
         TimeStamp = timeStamp;
         Lifetime = inputLifetime;
         ExpireTimeStamp = timeStamp.AddHours(inputLifetime);
-        Ciphertext = ciphertext; // TODO: Change this to byte[]?
+        Ciphertext = ciphertext;
         IV = iv;
     }
 

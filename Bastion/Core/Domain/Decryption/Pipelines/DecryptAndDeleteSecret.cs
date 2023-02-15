@@ -64,7 +64,7 @@ public class DecryptAndDeleteSecret
             // Convert key 
             secretKeyValue = Convert.FromBase64String(secretKey);
 
-            // Get list of blobs from storage container
+            // Get list of blobs in a storage container
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
             string StorageContainerName = "secrets-test";

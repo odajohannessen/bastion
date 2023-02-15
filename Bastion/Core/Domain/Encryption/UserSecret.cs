@@ -12,8 +12,7 @@ public class UserSecret
         TimeStamp = timeStamp;
         Lifetime = inputLifetime;
         ExpireTimeStamp = timeStamp.AddHours(inputLifetime);
-        Ciphertext = ciphertext; // TODO: Change this to byte[]?
-        Key = key;
+        Ciphertext = ciphertext; 
         IV = iv;
     }
 

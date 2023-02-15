@@ -7,7 +7,6 @@ public class UserSecretDecrypted
         Id = id;
         Plaintext = plaintext;
     }
-    // TODO: Do we need time stamp or lifetime here? Or just ID for continuity?
-    public Guid Id { get; protected set; } // TODO: Do we need to worry about how this is randomly set? Protected get? 
-    public string Plaintext { get; protected set; } // TODO: Protected get and protected set? 
+    public Guid Id { get; protected set; } 
+    public string Plaintext { get; protected set; } 
 }

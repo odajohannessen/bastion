@@ -77,7 +77,7 @@ public class DeletionService : IDeletionService
             }
         };
 
-        string keyVaultName = "kvbastion"; // TODO: Add somewhere else? Will always be the same
+        string keyVaultName = "kvbastion"; 
         string uri = $"https://{keyVaultName}.vault.azure.net";
 
         try
