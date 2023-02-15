@@ -17,13 +17,13 @@ public class LoggingManager
     {
         // Initialize Telemetry Client
         //var connectionString = Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING");
-        //string connectionString = GetSecretFromKeyVaultHelper.GetSecret("APPLICATIONINSIGHTS-CONNECTION-STRING"); // TODO: Update after creating func app in Azure
-        //if (connectionString == "Secret not found") 
-        //{
-        //    throw new Exception("Connection string not found");
-        //}
+        string connectionString = GetSecretFromKeyVaultHelper.GetSecret("APPLICATIONINSIGHTS-CONNECTION-STRING"); // TODO: Update after creating func app in Azure
+        if (connectionString == "Secret not found") 
+        {
+            throw new Exception("Connection string not found");
+        }
 
-        //telemetryClient = new TelemetryClient(new TelemetryConfiguration() { ConnectionString = connectionString });
+        telemetryClient = new TelemetryClient(new TelemetryConfiguration() { ConnectionString = connectionString });
         runId = Guid.NewGuid().ToString();
     }
 

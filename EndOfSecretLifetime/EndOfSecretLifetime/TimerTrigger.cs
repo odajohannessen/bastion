@@ -1,31 +1,33 @@
-//using System;
-//using Microsoft.Azure.WebJobs;
-//using Microsoft.Azure.WebJobs.Host;
-//using Microsoft.Extensions.Logging;
-//using EndOfSecretLifetime.Managers;
-//using EndOfSecretLifetime.Helpers;
+using System;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
+using EndOfSecretLifetime.Managers;
+using EndOfSecretLifetime.Helpers;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
-//namespace EndOfSecretLifetime
-//{
-//    public class TimerTrigger
-//    {
-//        [FunctionName("Function1")]
-//        public void Run([TimerTrigger("0 */5 * * * *")]TimerInfo myTimer)
-//        {
-//            //log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-//            // TODO: Add func app to MI 
+namespace EndOfSecretLifetime;
 
-//            // Retrieve a list of the secrets currently in storage
-//            string storageContainerName = "secrets-test";
-//            var blobList = StorageManager.GetBlobNames(storageContainerName);
+public class TimerTrigger
+{
+    private readonly StorageManager storageManager;
+    private readonly LoggingManager logging;
 
+    public TimerTrigger(StorageManager _storageManager, LoggingManager _logging)
+    {
+        storageManager = _storageManager;
+        logging = _logging;
+    }
 
-//            // What should the timer trigger do? 
-//            // 1. Get list of names of blobs - important that the files won't be downloaded, only names
-//            // 2. Innebygd sjekk om noen har levd mer enn 24 t
-//            // Sett grense på 24 t
-//            // List -> dict(key, dato) fra navn
-//            // ISO8601 for date
-//        }
-//    }
-//}
+    [FunctionName("TimerTrigger")]
+    public async Task Run([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer)
+    {
+        logging.LogEvent("Starting life time check of stored secrets");
+
+        string storageContainerName = "secrets-test";
+        bool success = await storageManager.CheckExpirationAndDelete(storageContainerName);
+
+        logging.LogEvent("Finished life time check of stored secrets");        
+    }
+}
