@@ -10,7 +10,7 @@ namespace Bastion.Core.Domain.Encryption.Pipelines;
 public class EncryptAndSaveSecret
 {
     public record Request(UserInputDto userInputDto) : IRequest<Response>; 
-    public record Response(bool success);
+    public record Response(byte[] CiphertextBytes, byte[] Key, byte[] IV, string Id);
 
     public class Handler : IRequestHandler<Request, Response>
     {
@@ -67,8 +67,7 @@ public class EncryptAndSaveSecret
             }
             logging.LogEvent("Secret succesfully stored for anonymous user.");
 
-            bool success = true; 
-            return new Response(success);
+            return new Response(encryptionResponse.Item1, encryptionResponse.Item2, encryptionResponse.Item3, userSecret.Id.ToString());
         }
     }
 
