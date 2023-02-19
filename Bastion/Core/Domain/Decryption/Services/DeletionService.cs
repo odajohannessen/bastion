@@ -10,15 +10,24 @@ using Azure.Storage.Blobs.Models;
 using Azure;
 using Bastion.Core.Domain.Encryption;
 using Bastion.Helpers;
+using Bastion.Managers;
 
 namespace Bastion.Core.Domain.Decryption.Services;
 
 public class DeletionService : IDeletionService
 {
+    public LoggingManager logging;
+
+    public DeletionService(LoggingManager loggingManager)
+    {
+        logging = loggingManager;
+    }
+
     public async Task<bool> DeleteSecret(string id, string blobName)
     {
         if (id == null || blobName == null)
         {
+            logging.LogException("Id or blob name is null.");
             return false;
         }
 
@@ -26,6 +35,7 @@ public class DeletionService : IDeletionService
         var successBlob = await DeleteSecretFromBlobStorage(blobName);
         if (!successBlob)
         {
+            logging.LogException($"Deletion of blob failed. ID: '{id}'.");
             return false;
         }
 
@@ -33,6 +43,7 @@ public class DeletionService : IDeletionService
         var successKey = await DeleteKeyFromKeyVault(id);
         if (!successKey)
         {
+            logging.LogException($"Deletion of key failed. ID: '{id}'.");
             return false;
         }
 
@@ -54,10 +65,10 @@ public class DeletionService : IDeletionService
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
             await client.DeleteAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logging.LogException($"Error deleting blob: '{ex.Message}'. Blob name: '{blobName}'.");
             return false;
-            throw new Exception("Error uploading secret");
         }
 
         return true;
@@ -86,9 +97,9 @@ public class DeletionService : IDeletionService
             SecretClient client = new SecretClient(new Uri(uri), credentials, options);
             await client.StartDeleteSecretAsync(id);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // TODO: add logging
+            logging.LogException($"Error deleting key: '{ex.Message}'. ID: '{id}'.");
             return false;
         }
 

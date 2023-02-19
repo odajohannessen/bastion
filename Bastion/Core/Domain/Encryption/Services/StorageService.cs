@@ -9,16 +9,25 @@ using Azure.Core;
 using Azure.Storage.Blobs.Models;
 using Azure;
 using Bastion.Helpers;
+using Bastion.Managers;
 
 namespace Bastion.Core.Domain.Encryption.Services;
 
 public class StorageService : IStorageService
 {
+    public LoggingManager logging;
+
+    public StorageService(LoggingManager loggingManager)
+    {
+        logging = loggingManager;
+    }
+
     public async Task<(bool, string)> StoreSecret(UserSecret userSecret)
     {
         // Check input UserSecret
         if (userSecret == null)
         {
+            logging.LogException($"UserSecret input is null, storing failed");
             return (false, "");
         }
 
@@ -29,6 +38,7 @@ public class StorageService : IStorageService
 
         if (!successBlob)
         {
+            logging.LogException($"Storing of blob failed. ID: '{userSecret.Id}'.");
             return (false, "");
         }
 
@@ -36,6 +46,7 @@ public class StorageService : IStorageService
 
         if (!successKey)
         {
+            logging.LogException($"Storing of key failed. ID: '{userSecret.Id}'.");
             return (false, "");
         }
 
@@ -50,6 +61,7 @@ public class StorageService : IStorageService
     {
         if (secretJsonFormat == null || userSecret == null) 
         {
+            logging.LogException("Secret is empty.");
             throw new Exception("Secret cannot be empty");
         }
 
@@ -68,10 +80,10 @@ public class StorageService : IStorageService
             MemoryStream ms = new MemoryStream(secretByteArray);
             await client.UploadAsync(ms);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logging.LogException($"Error uploading secret to blob storage: '{ex.Message}'. ID: '{userSecret.Id}'");
             return false;
-            throw new Exception("Error uploading secret");
         }
 
         return true;
@@ -82,6 +94,7 @@ public class StorageService : IStorageService
     {
         if (userSecret == null || userSecret.Key == null)
         {
+            logging.LogException("User secret or key cannot be empty");
             throw new Exception("User secret or key cannot be empty");
         }
 
@@ -107,10 +120,10 @@ public class StorageService : IStorageService
             SecretClient client = new SecretClient(new Uri(uri), credentials, options);
             await client.SetSecretAsync(keyName, keyValue);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logging.LogException($"Error uploading key to key vault: '{ex.Message}'. ID: '{userSecret.Id}'");
             return false;
-            throw new Exception("Error uploading secret key");
         }
 
         return true;

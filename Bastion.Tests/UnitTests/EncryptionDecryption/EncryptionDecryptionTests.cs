@@ -1,6 +1,7 @@
 using Bastion.Core.Domain.Encryption;
 using Bastion.Core.Domain.Encryption.Services;
 using Bastion.Core.Domain.Decryption.Services;
+using Bastion.Managers;
 
 namespace Bastion.Tests.UnitTests.EncryptionDecryption;
 
@@ -10,9 +11,10 @@ public class EncryptionDecryptionTests
     public void RoundtripTest()
     {
         // Arrange
+        LoggingManager logging = new LoggingManager();
         string plaintext = "test";
-        EncryptionService encryptionService = new EncryptionService();
-        DecryptionService decryptionService = new DecryptionService();
+        EncryptionService encryptionService = new EncryptionService(logging);
+        DecryptionService decryptionService = new DecryptionService(logging);
 
         // Act
         var encryptionResponse = encryptionService.EncryptSecret(plaintext);

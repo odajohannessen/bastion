@@ -27,25 +27,16 @@ public class EncryptAndSaveSecret
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
-            logging.LogEvent("A request to create a secret for an anonymous user has been received.");
-            logging.LogEvent("Starting handling of request for encrypting and saving secret.");
+            logging.LogEvent($"A request to create a secret for an anonymous user has been received. ID: '{request.userInputDto.Id}'.");
 
             (byte[], byte[], byte[]) encryptionResponse;
             string ciphertext;
             UserSecret userSecret;
 
-            try
-            {
-                // Encrypt data
-                encryptionResponse = await EncryptionService.EncryptSecret(request.userInputDto.SecretPlaintext);
-                ciphertext = System.Convert.ToBase64String(encryptionResponse.Item1);
-                logging.LogTrace("Secret succesfully encrypted.");
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
+            // Encrypt data
+            encryptionResponse = await EncryptionService.EncryptSecret(request.userInputDto.SecretPlaintext);
+            ciphertext = System.Convert.ToBase64String(encryptionResponse.Item1);
+            logging.LogTrace($"Secret succesfully encrypted. ID: '{request.userInputDto.Id}'.");
 
             // Create UserSecret object 
             try
@@ -55,6 +46,7 @@ public class EncryptAndSaveSecret
             }
             catch (Exception ex)
             {
+                logging.LogException($"Error creating UserSecret object: '{ex.Message}'");
                 throw new Exception(ex.Message, ex);
             }
 
@@ -62,10 +54,10 @@ public class EncryptAndSaveSecret
             var storageResponse = await StorageService.StoreSecret(userSecret);
             if (!storageResponse.Item1)
             {
-                logging.LogException("Storage of secret failed");
+                logging.LogException("Storage of secret failed. ID: '{request.userInputDto.Id}'.");
                 throw new Exception("Problems with storing");
             }
-            logging.LogEvent("Secret succesfully stored for anonymous user.");
+            logging.LogEvent("Secret succesfully stored for anonymous user. ID: '{request.userInputDto.Id}'.");
 
             return new Response(encryptionResponse.Item1, encryptionResponse.Item2, encryptionResponse.Item3, userSecret.Id.ToString());
         }

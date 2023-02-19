@@ -38,11 +38,12 @@ public class DecryptAndDeleteSecret
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
             logging.LogEvent("A request to access a secret by an anonymous user has been received.");
-            logging.LogEvent("Starting handling of request for decrypting and deleting secret.");
+            logging.LogEvent($"Starting handling of request for decrypting and deleting secret. ID: '{request.Id}'.");
 
             if (request.Id == null)
             {
-                throw new Exception("Id cannot be empty");
+                logging.LogException($"Id cannot be null");
+                throw new Exception("Id cannot be null");
             }
 
             bool success = false;
@@ -109,14 +110,15 @@ public class DecryptAndDeleteSecret
             ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
 
             // Decrypt secret
-            plaintext = await DecryptionService.DecryptSecret(ciphertext, secretKeyValue, userSecret.IV); 
+            plaintext = await DecryptionService.DecryptSecret(ciphertext, secretKeyValue, userSecret.IV);
+            logging.LogEvent($"Secret successfully decrypted. ID: {request.Id}");
 
             // Delete secret and key
             success = await DeletionService.DeleteSecret(request.Id, blobName);
 
             if (success) 
             {
-                logging.LogEvent("Secret succesfully accessed by anonymous user and deleted from storage.");
+                logging.LogEvent($"Secret succesfully accessed by anonymous user and deleted from storage. ID: '{request.Id}'.");
             }
 
             return new Response(success, plaintext);

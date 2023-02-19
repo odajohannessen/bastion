@@ -1,9 +1,17 @@
-﻿using System.Security.Cryptography;
+﻿using Bastion.Managers;
+using System.Security.Cryptography;
 
 namespace Bastion.Core.Domain.Decryption.Services;
 
 public class DecryptionService : IDecryptionService
 {
+    public LoggingManager logging;
+
+    public DecryptionService(LoggingManager loggingManager)
+    {
+        logging = loggingManager;
+    }
+
     public async Task<string> DecryptSecret(byte[] ciphertextBytes, byte[] key, byte[] IV) 
     {
         string plaintext = DecryptStringFromBytes(ciphertextBytes, key, IV);
@@ -11,19 +19,22 @@ public class DecryptionService : IDecryptionService
   
     }
 
-    private static string DecryptStringFromBytes(byte[] ciphertext, byte[] Key, byte[] IV)
+    private string DecryptStringFromBytes(byte[] ciphertext, byte[] Key, byte[] IV)
     {
         // Check validity of input
         if (ciphertext == null || ciphertext.Length <= 0) 
         {
+            logging.LogException("Invalid ciphertext input.");
             throw new ArgumentNullException(nameof(ciphertext));       
         }
         else if (Key == null || Key.Length <= 0) 
         {
+            logging.LogException("Invalid key input.");
             throw new ArgumentNullException(nameof(Key));
         }
         else if (IV == null || IV.Length <= 0) 
         {
+            logging.LogException("Invalid IV input.");
             throw new ArgumentNullException(nameof(IV));
         }
 
@@ -54,7 +65,7 @@ public class DecryptionService : IDecryptionService
         }
         catch (Exception ex) 
         {
-            // TODO: Logging?
+            logging.LogException($"Error decypting ciphertext: '{ex.Message}'.");
             throw new Exception(ex.ToString());
         }
 

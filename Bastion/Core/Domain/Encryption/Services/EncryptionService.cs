@@ -1,9 +1,17 @@
-﻿using System.Security.Cryptography;
+﻿using Bastion.Managers;
+using System.Security.Cryptography;
 
 namespace Bastion.Core.Domain.Encryption.Services;
 
 public class EncryptionService : IEncryptionService
 {
+    public LoggingManager logging;
+
+    public EncryptionService(LoggingManager loggingManager)
+    { 
+        logging = loggingManager;
+    }
+
     public async Task<(byte[], byte[], byte[])> EncryptSecret(string plaintext) 
     {
         using (Aes aes = Aes.Create())
@@ -13,7 +21,7 @@ public class EncryptionService : IEncryptionService
         }
     }
 
-    private static (byte[], byte[], byte[]) EncryptStringToBytes(string plaintext, byte[] Key, byte[] IV)
+    private (byte[], byte[], byte[]) EncryptStringToBytes(string plaintext, byte[] Key, byte[] IV)
     {
         // Check validity of input
         if (plaintext == null || plaintext.Length <= 0) 
@@ -64,8 +72,8 @@ public class EncryptionService : IEncryptionService
         }
         catch (Exception ex) 
         {
-            // TODO: Logging?
-            throw new Exception(ex.ToString());
+            logging.LogException($"Error encrypting plaintext: '{ex.Message}'");
+            throw new Exception($"Error encrypting plaintext: '{ex.Message}'");
         }
     }
 }
