@@ -10,5 +10,6 @@ public class UserInputModel : PageModel
     public string SecretPlaintext { get; set; } = "";
 
     [Required]
+    [Range(1, 24)]
     public int Lifetime { get; set; } = 1;
 }

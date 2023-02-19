@@ -62,3 +62,39 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+
+h1 {
+    text-align: center;
+}
+
+div {
+    text-align: center;
+}
+
+textarea {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 900px;
+    height: 150px;
+}
+
+.decrypted {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #C3D5E1;
+    min-width: 100px;
+    max-width: 800px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 3px;
+}
+/*
+    Bouvet colors:
+    #F9EAD4 light beige
+    #11133C dark blue
+    #F9A86F orange
+    #C3D5E1 light blue
+*/

@@ -19,6 +19,7 @@ builder.Services.AddTransient<IDecryptionService, DecryptionService>();
 builder.Services.AddTransient<IStorageService, StorageService>();
 builder.Services.AddTransient<IDeletionService, DeletionService>();
 builder.Services.AddTransient<LoggingManager>();
+builder.Services.AddScoped<CopyToClipboardManager>();
 
 builder.Services.AddMediatR(typeof(Program));
 //builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);

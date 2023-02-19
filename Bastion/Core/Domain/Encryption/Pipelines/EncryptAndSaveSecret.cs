@@ -54,10 +54,10 @@ public class EncryptAndSaveSecret
             var storageResponse = await StorageService.StoreSecret(userSecret);
             if (!storageResponse.Item1)
             {
-                logging.LogException("Storage of secret failed. ID: '{request.userInputDto.Id}'.");
+                logging.LogException($"Storage of secret failed. ID: '{request.userInputDto.Id}'.");
                 throw new Exception("Problems with storing");
             }
-            logging.LogEvent("Secret succesfully stored for anonymous user. ID: '{request.userInputDto.Id}'.");
+            logging.LogEvent($"Secret successfully stored for anonymous user. ID: '{request.userInputDto.Id}'.");
 
             return new Response(encryptionResponse.Item1, encryptionResponse.Item2, encryptionResponse.Item3, userSecret.Id.ToString());
         }
