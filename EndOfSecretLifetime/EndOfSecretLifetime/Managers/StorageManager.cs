@@ -68,8 +68,10 @@ public class StorageManager
         }
         catch (Exception e) 
         {
+            logging.LogException($"Error deleting blob: '{e.Message}'");
             throw new Exception($"Error deleting blob: '{e.Message}'");
         }
+        logging.LogEvent($"Deleted blob with name: '{blobname}'");
 
         return true;
     }
@@ -88,8 +90,10 @@ public class StorageManager
         }
         catch (Exception e)
         {
+            logging.LogException($"Error deleting key: '{e.Message}'");
             throw new Exception($"Error deleting key: '{e.Message}'");
         }
+        logging.LogEvent($"Deleted key with ID: '{keyName}'");
 
         return true;
     }
@@ -124,9 +128,12 @@ public class StorageManager
             }
             catch (Exception e)
             {
+
+                logging.LogException($"Error extracting and checking for expired blobs: '{e.Message}'");
                 throw new Exception($"Error extracting and checking for expired blobs: '{e.Message}'");
             }
         }
+        logging.LogEvent("Expired secrets, if any, successfully extracted.");
 
         return secretExpiredDict;
     }
@@ -152,12 +159,13 @@ public class StorageManager
                 secretList.Add(blobItem.Name);
             }
 
+            logging.LogEvent("Successfully retrieved list of blob names, if any present.");
             return secretList;
         }
         catch (Exception e)
         {
+            logging.LogException($"Error retrieving list of blobs: '{e.Message}'");
             throw new Exception($"Error retrieving list of blobs: '{e.Message}'");
         }
     }
-
 }
