@@ -53,14 +53,21 @@
 {
     @url
 }
+else 
+{
+    @message
+}
 </div>
+
 @code {
     private UserInputModel userInputModel = new();
     private Guid id = default;
     private string url = $"https://bastion-bouvet.azurewebsites.net/";
+    public string message = "";
 
     private async void HandleValidSubmit()
     {
+        message = "Encrypting secret...";
         // Create user input
         var responseInput = await mediator.Send(new CreateUserInput.Request(userInputModel.SecretPlaintext, userInputModel.Lifetime));
 
