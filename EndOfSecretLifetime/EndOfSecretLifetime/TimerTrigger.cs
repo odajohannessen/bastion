@@ -21,7 +21,7 @@ public class TimerTrigger
     }
 
     [FunctionName("TimerTrigger")]
-    public async Task Run([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer)
+    public async Task Run([TimerTrigger("*/10 * * * * *")] TimerInfo myTimer)
     {
         logging.LogEvent("Starting life time check of stored secrets");
 
