@@ -14,15 +14,27 @@ public class LoggingManager
 
     public string runId;
 
-    public LoggingManager()
+    public LoggingManager(string connectionStringSecretName = "") // Input only used in the case of unit testing
     {
         // Initialize Telemetry Client
-        string connectionString = GetSecretFromKeyVaultHelper.GetSecret("APPLICATIONINSIGHTS-CONNECTION-STRING");
-        if (connectionString == "Secret not found") 
+        string? connectionString;
+        if (connectionStringSecretName == "")
         {
-            throw new Exception("Connection string not found");
+            connectionString = GetSecretFromKeyVaultHelper.GetSecret("APPLICATIONINSIGHTS-CONNECTION-STRING");
+            if (connectionString == "Secret not found")
+            {
+                throw new Exception("Connection string not found");
+            }
         }
-
+        else 
+        {
+            // Gets environment variable stored in GitHub
+            connectionString = Environment.GetEnvironmentVariable(connectionStringSecretName);
+            if (connectionString == null) 
+            {
+                throw new Exception("Connection string not found");
+            }
+        }
         telemetryClient = new TelemetryClient(new TelemetryConfiguration() { ConnectionString = connectionString });
         runId = Guid.NewGuid().ToString();
     }
