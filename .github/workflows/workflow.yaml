@@ -24,9 +24,9 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
       working-directory: 'Bastion'
+    - name: Test
       env:
         APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
-    - name: Test
       run: dotnet test 
       working-directory: 'Bastion.Tests'
 # run: dotnet test  --no-restore --verbosity normal
