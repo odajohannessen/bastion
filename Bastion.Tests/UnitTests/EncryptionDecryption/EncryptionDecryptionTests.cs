@@ -11,7 +11,7 @@ public class EncryptionDecryptionTests
     public void RoundtripTest()
     {
         // Arrange
-        LoggingManager logging = new LoggingManager();
+        LoggingManager logging = new LoggingManager("APPLICATIONINSIGHTS_CONNECTION_STRING");
         string plaintext = "test";
         EncryptionService encryptionService = new EncryptionService(logging);
         DecryptionService decryptionService = new DecryptionService(logging);
