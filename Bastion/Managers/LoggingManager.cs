@@ -32,7 +32,7 @@ public class LoggingManager
             connectionString = Environment.GetEnvironmentVariable(connectionStringSecretName);
             if (connectionString == null) 
             {
-                throw new Exception("Connection string not found");
+                throw new Exception("Connection string not found for testing");
             }
         }
         telemetryClient = new TelemetryClient(new TelemetryConfiguration() { ConnectionString = connectionString });
