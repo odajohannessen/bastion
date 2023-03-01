@@ -116,7 +116,7 @@ public class StorageManager
                 DateTime expireTimeStamp = DateTime.Parse(expireTimeStampString);
 
                 // If secret is expired, add it to the dict
-                if (expireTimeStamp < DateTime.Now)
+                if (expireTimeStamp < DateTime.UtcNow) // TODO: sjekk at timestamp som settes er utc 
                 {
                     // Extract id
                     int fromId = 0;

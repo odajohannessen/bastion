@@ -21,8 +21,9 @@ builder.Services.AddTransient<IDeletionService, DeletionService>();
 builder.Services.AddTransient<LoggingManager>();
 builder.Services.AddScoped<CopyToClipboardManager>();
 
-builder.Services.AddMediatR(typeof(Program));
+//builder.Services.AddMediatR(typeof(Program));
 //builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
 
 var app = builder.Build();
 
