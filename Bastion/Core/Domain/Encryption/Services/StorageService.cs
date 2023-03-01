@@ -109,7 +109,7 @@ public class StorageService : IStorageService
             }
         };
 
-        string keyVaultName = "kvbastion";
+        string keyVaultName = "kvbastion-secrets";
         string uri = $"https://{keyVaultName}.vault.azure.net";
         string keyName = userSecret.Id.ToString(); // Key vault naming convention does not allow datetime format in string, only using id here
         string keyValue = Convert.ToBase64String(userSecret.Key);

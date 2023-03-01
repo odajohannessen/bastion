@@ -88,7 +88,7 @@ public class DeletionService : IDeletionService
             }
         };
 
-        string keyVaultName = "kvbastion"; 
+        string keyVaultName = "kvbastion-secrets"; 
         string uri = $"https://{keyVaultName}.vault.azure.net";
 
         try
