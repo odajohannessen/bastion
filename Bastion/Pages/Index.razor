@@ -9,6 +9,7 @@
 @using Bastion.Core.Domain.Decryption;
 @using Bastion.Core.Domain.Decryption.Pipelines;
 @using Bastion.Models;
+@using Microsoft.Identity.Web.UI;
 @inject CopyToClipboardManager ClipBoardManager
 
 <PageTitle>Bastion</PageTitle>
@@ -93,7 +94,7 @@ else
         }
         catch
         {
-            Console.WriteLine("Cannot write text to clipboard");
+            Console.WriteLine("Cannot copy text to clipboard");
         }
     }
 }
