@@ -30,4 +30,8 @@
 	<PackageReference Include="Microsoft.Identity.Web.MicrosoftGraph" Version="1.24.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+
 </Project>

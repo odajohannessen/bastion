@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.AspNetCore.Rewrite;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,18 +39,47 @@ builder.Services.AddTransient<IDeletionService, DeletionService>();
 builder.Services.AddTransient<LoggingManager>();
 builder.Services.AddScoped<CopyToClipboardManager>();
 
+// Default login after startup before reaching index page
+//builder.Services.AddAuthorization(options =>
+//{
+//    // By default, all incoming requests will be authorized according to the default policy
+//    options.FallbackPolicy = options.DefaultPolicy;
+//});
 
-builder.Services.AddAuthorization(options =>
+builder.Services.AddAuthorization(); 
+
+// Prompt user to select Microsoft account when logging in
+builder.Services.Configure<OpenIdConnectOptions>(options =>
 {
-    // By default, all incoming requests will be authorized according to the default policy
-    options.FallbackPolicy = options.DefaultPolicy;
+    options.Events.OnRedirectToIdentityProvider = context =>
+    {
+        context.ProtocolMessage.SetParameter("prompt", "select_account");
+        return Task.FromResult(0);
+    };
 });
 
 //builder.Services.AddMediatR(typeof(Program));
-//builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
 
 var app = builder.Build();
+
+// Redirect after logging in, doesn't work
+app.UseRewriter(
+    new RewriteOptions().Add(
+        context => {
+            if (context.HttpContext.Request.Path == "/MicrosoftIdentity/Account/SignIn")
+            { context.HttpContext.Response.Redirect("/authenticated"); }
+        })
+);
+
+// Redirect after logging out
+app.UseRewriter(
+    new RewriteOptions().Add(
+        context => {
+            if (context.HttpContext.Request.Path == "/MicrosoftIdentity/Account/SignedOut")
+            { context.HttpContext.Response.Redirect("/"); }
+        })
+);
 
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())

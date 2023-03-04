@@ -1,0 +1,9 @@
+﻿@page "/signout-oidc"
+@inject NavigationManager NavManager
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavManager.NavigateTo("/");
+    }
+}
