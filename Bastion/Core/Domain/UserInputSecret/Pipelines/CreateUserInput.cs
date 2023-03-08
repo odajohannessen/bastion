@@ -6,7 +6,7 @@ namespace Bastion.Core.Domain.UserInputSecret.Pipelines;
 
 public class CreateUserInput
 {
-    public record Request(string inputSecretPlaintext, int inputLifeTime) : IRequest<Response>;
+    public record Request(string inputSecretPlaintext, int inputLifeTime, string oidSender = "", string oidReceiver = "") : IRequest<Response>;
 
     public record Response(bool success, UserInput userInput);
 
@@ -17,7 +17,7 @@ public class CreateUserInput
             try
             {
                 // Create a new UserInput object
-                UserInput userInput = new UserInput(request.inputSecretPlaintext, request.inputLifeTime);
+                UserInput userInput = new UserInput(request.inputSecretPlaintext, request.inputLifeTime, request.oidSender, request.oidReceiver);
                 return new Response(true, userInput);
             }
             catch (Exception ex)

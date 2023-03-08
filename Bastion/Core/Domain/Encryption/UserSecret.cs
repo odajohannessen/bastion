@@ -1,4 +1,6 @@
-﻿namespace Bastion.Core.Domain.Encryption;
+﻿using MediatR;
+
+namespace Bastion.Core.Domain.Encryption;
 
 public class UserSecret 
 {
@@ -6,7 +8,7 @@ public class UserSecret
     {
     }
 
-    public UserSecret(Guid id, string ciphertext, int inputLifetime, DateTime timeStamp, byte[] key, byte[] iv)
+    public UserSecret(Guid id, string ciphertext, int inputLifetime, DateTime timeStamp, byte[] key, byte[] iv, string oidSenderHash="", string oidReceiverHash="")
     {
         Id = id;
         TimeStamp = timeStamp;
@@ -15,6 +17,8 @@ public class UserSecret
         Ciphertext = ciphertext;
         Key = key;
         IV = iv;
+        OIDSenderHash = oidSenderHash;
+        OIDReceiverHash = oidReceiverHash;
     }
 
     public Guid Id { get; protected set; } 
@@ -24,5 +28,7 @@ public class UserSecret
     public string Ciphertext { get; protected set; }
     public byte[] Key { get; protected set; }
     public byte[] IV { get; protected set;}
+    public string OIDSenderHash { get; protected set; }
+    public string OIDReceiverHash { get; protected set; }
 }
 

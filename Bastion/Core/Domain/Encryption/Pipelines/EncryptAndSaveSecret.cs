@@ -4,6 +4,7 @@ using Bastion.Core.Domain.Encryption.Services;
 using Bastion.Core.Domain.UserInputSecret.Dto;
 using Bastion.Managers;
 using System.Text;
+using Bastion.Helpers;
 
 namespace Bastion.Core.Domain.Encryption.Pipelines;
 
@@ -27,11 +28,28 @@ public class EncryptAndSaveSecret
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
-            logging.LogEvent($"A request to create a secret for an anonymous user has been received. ID: '{request.userInputDto.Id}'.");
+            if (request.userInputDto.OIDSender == "" && request.userInputDto.OIDReceiver == "")
+            {
+                logging.LogEvent($"A request to create a secret for an anonymous user has been received. ID: '{request.userInputDto.Id}'.");
+            }
+            else
+            {
+                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OID '{request.userInputDto.OIDReceiver}' has been received. ID: '{request.userInputDto.Id}'.");
+            }
 
             (byte[], byte[], byte[]) encryptionResponse;
             string ciphertext;
             UserSecret userSecret;
+            string hashSender = "";
+            string hashReceiver = "";
+
+            // Hash OIDs for sender and receiver, if user is authenticated when creating secret
+            if (request.userInputDto.OIDSender != "" && request.userInputDto.OIDReceiver != "")
+            {
+                hashSender = HashingHelper.GetHash(request.userInputDto.OIDSender);
+                hashReceiver = HashingHelper.GetHash(request.userInputDto.OIDReceiver);
+                logging.LogTrace($"Sender and receiver OIDs hashed successfully.");
+            }
 
             // Encrypt data
             encryptionResponse = await EncryptionService.EncryptSecret(request.userInputDto.SecretPlaintext);
@@ -42,7 +60,7 @@ public class EncryptAndSaveSecret
             try
             {
                 UserInputDto userInputDto = request.userInputDto;
-                userSecret = new UserSecret(userInputDto.Id, ciphertext, userInputDto.Lifetime, userInputDto.TimesStamp, encryptionResponse.Item2, encryptionResponse.Item3);
+                userSecret = new UserSecret(userInputDto.Id, ciphertext, userInputDto.Lifetime, userInputDto.TimesStamp, encryptionResponse.Item2, encryptionResponse.Item3, hashSender, hashReceiver);
             }
             catch (Exception ex)
             {

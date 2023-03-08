@@ -67,7 +67,7 @@ var app = builder.Build();
 app.UseRewriter(
     new RewriteOptions().Add(
         context => {
-            if (context.HttpContext.Request.Path == "/MicrosoftIdentity/Account/SignIn")
+            if (context.HttpContext.Request.Path == "/signin-oidc")//"/MicrosoftIdentity/Account/SignIn")
             { context.HttpContext.Response.Redirect("/authenticated"); }
         })
 );

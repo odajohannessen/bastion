@@ -134,7 +134,7 @@ public class StorageService : IStorageService
     public static string SecretStorageFormat(UserSecret userSecret)
     {
         // Exclude key from jsonData which is to be stored
-        UserSecretJsonFormat secretJsonFormat = new UserSecretJsonFormat(userSecret.Id, userSecret.Ciphertext, userSecret.Lifetime, userSecret.TimeStamp, userSecret.IV);
+        UserSecretJsonFormat secretJsonFormat = new UserSecretJsonFormat(userSecret.Id, userSecret.Ciphertext, userSecret.Lifetime, userSecret.TimeStamp, userSecret.IV, userSecret.OIDSenderHash, userSecret.OIDReceiverHash);
         string jsonData = JsonConvert.SerializeObject(secretJsonFormat);
 
         return jsonData;

@@ -20,7 +20,7 @@ namespace Bastion.Core.Domain.Decryption.Pipelines;
 
 public class DecryptAndDeleteSecret
 {
-    public record Request(string Id) : IRequest<Response>;
+    public record Request(string Id, string OIDReceiver="") : IRequest<Response>;
     public record Response(bool success, string Plaintext);
 
     public class Handler : IRequestHandler<Request, Response>
@@ -38,7 +38,14 @@ public class DecryptAndDeleteSecret
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
-            logging.LogEvent($"Starting handling of anonymous request for decrypting and deleting secret. ID: '{request.Id}'.");
+            if (request.OIDReceiver != "")
+            {
+                logging.LogEvent($"Starting handling of request for user with OID '{request.OIDReceiver}' for accessing secret. ID: '{request.Id}'.");
+            }
+            else
+            {
+                logging.LogEvent($"Starting handling of anonymous request accessing secret. ID: '{request.Id}'.");
+            }
 
             if (request.Id == null)
             {
@@ -88,6 +95,14 @@ public class DecryptAndDeleteSecret
                 throw new Exception("Error deserializing");
             }
             ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
+
+            // Confirm the user who has requested to see the secret is the intended receiver
+            bool successHash = HashingHelper.VerifyHash(request.OIDReceiver, userSecret.OIDReceiverHash);
+            if (!successHash)
+            {
+                logging.LogEvent($"The user with OID '{request.OIDReceiver}' is not the intended receiver of the secret with ID: '{request.Id}'. Access denied.");
+                return new Response(success, "The current user in is not the intended receiver of this secret");
+            }
 
             // Decrypt secret
             plaintext = await DecryptionService.DecryptSecret(ciphertext, secretKeyValue, userSecret.IV);
