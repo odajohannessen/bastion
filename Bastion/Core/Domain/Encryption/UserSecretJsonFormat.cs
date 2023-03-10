@@ -2,7 +2,7 @@
 
 public class UserSecretJsonFormat
 {
-    public UserSecretJsonFormat(Guid id, string ciphertext, int inputLifetime, DateTime timeStamp, byte[] iv, string oidSenderHash = "", string oidReceiverHash = "")
+    public UserSecretJsonFormat(Guid id, string ciphertext, int inputLifetime, DateTime timeStamp, byte[] iv, string oidSender = "", string oidReceiver = "")
     {
         Id = id;
         TimeStamp = timeStamp;
@@ -10,8 +10,8 @@ public class UserSecretJsonFormat
         ExpireTimeStamp = timeStamp.AddHours(inputLifetime);
         Ciphertext = ciphertext;
         IV = iv;
-        OIDSenderHash = oidSenderHash;
-        OIDReceiverHash = oidReceiverHash;
+        OIDSender = oidSender;
+        OIDReceiver = oidReceiver;
     }
 
     public Guid Id { get; protected set; } 
@@ -20,6 +20,6 @@ public class UserSecretJsonFormat
     public DateTime ExpireTimeStamp { get; protected set; }
     public string Ciphertext { get; protected set; } 
     public byte[] IV { get; protected set; }
-    public string OIDSenderHash { get; protected set; }
-    public string OIDReceiverHash { get; protected set; }
+    public string OIDSender { get; protected set; }
+    public string OIDReceiver { get; protected set; }
 }

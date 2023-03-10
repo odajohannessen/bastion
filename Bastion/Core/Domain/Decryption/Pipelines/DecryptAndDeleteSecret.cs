@@ -15,6 +15,8 @@ using Bastion.Helpers;
 using Bastion.Managers;
 using Azure.Storage.Blobs.Models;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Bastion.Core.Domain.Decryption.Pipelines;
 
@@ -38,7 +40,7 @@ public class DecryptAndDeleteSecret
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
-            if (request.OIDReceiver != "")
+            if (!request.OIDReceiver.IsNullOrEmpty())
             {
                 logging.LogEvent($"Starting handling of request for user with OID '{request.OIDReceiver}' for accessing secret. ID: '{request.Id}'.");
             }
@@ -50,10 +52,23 @@ public class DecryptAndDeleteSecret
             if (request.Id == null)
             {
                 logging.LogException($"Id cannot be null");
-                throw new Exception("Id cannot be null");
+                throw new Exception("Id cannot be null"); // throw or return here? Is this even necessary?
             }
 
             bool success = false;
+
+            // Check if given id is in a GUID format
+            var result = Regex.Replace(request.Id, @"(?im)^[{(]?[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?$","'$0'");
+            if (string.Equals(request.Id, result))
+            {
+                logging.LogTrace($"Secret entered not on GUID format, and not a valid page.");
+                return new Response(success, "Invalid GUID");
+            }
+            else
+            {
+                logging.LogTrace($"Guid secret format registered.");
+            }
+
             string plaintext;
             byte[] ciphertext;
             byte[] secretKeyValue;
@@ -96,12 +111,16 @@ public class DecryptAndDeleteSecret
             }
             ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
 
-            // Confirm the user who has requested to see the secret is the intended receiver
-            bool successHash = HashingHelper.VerifyHash(request.OIDReceiver, userSecret.OIDReceiverHash);
-            if (!successHash)
+            // Confirm the user who has requested to see the secret is the intended receive
+            if (!request.OIDReceiver.IsNullOrEmpty())
             {
-                logging.LogEvent($"The user with OID '{request.OIDReceiver}' is not the intended receiver of the secret with ID: '{request.Id}'. Access denied.");
-                return new Response(success, "The current user in is not the intended receiver of this secret");
+                //bool successHash = HashingHelper.VerifyHash(request.OIDReceiver, userSecret.OIDReceiver);
+                //if (!successHash)
+                if (!string.Equals(request.OIDReceiver, userSecret.OIDReceiver))
+                {
+                    logging.LogEvent($"The user with OID '{request.OIDReceiver}' is not the intended receiver of the secret with ID: '{request.Id}'. Access denied.");
+                    return new Response(success, "The current user in is not the intended receiver of this secret.");
+                }
             }
 
             // Decrypt secret
@@ -113,6 +132,7 @@ public class DecryptAndDeleteSecret
 
             if (success) 
             {
+                // TODO: Update logging message in case some one is logged in
                 logging.LogEvent($"Secret succesfully accessed by anonymous user and deleted from storage. ID: '{request.Id}'.");
             }
 
