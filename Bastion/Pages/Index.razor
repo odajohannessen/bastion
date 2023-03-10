@@ -173,6 +173,8 @@
         var authenticationState = await authenticationStateTask;
         var user = authenticationState.User;
         authenticated = user.Identity?.IsAuthenticated ?? false;
+
+        // TODO: Separate out into helper functions?
         if (authenticated)
         {
             if (userInfo == null)

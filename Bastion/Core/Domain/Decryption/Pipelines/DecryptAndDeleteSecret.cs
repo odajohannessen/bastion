@@ -23,7 +23,7 @@ namespace Bastion.Core.Domain.Decryption.Pipelines;
 public class DecryptAndDeleteSecret
 {
     public record Request(string Id, string OIDReceiver="") : IRequest<Response>;
-    public record Response(bool success, string Plaintext);
+    public record Response(bool success, string Plaintext, string OIDSender);
 
     public class Handler : IRequestHandler<Request, Response>
     {
@@ -62,7 +62,7 @@ public class DecryptAndDeleteSecret
             if (string.Equals(request.Id, result))
             {
                 logging.LogTrace($"Secret entered not on GUID format, and not a valid page.");
-                return new Response(success, "Invalid GUID");
+                return new Response(success, "Invalid GUID", "");
             }
             else
             {
@@ -81,7 +81,7 @@ public class DecryptAndDeleteSecret
             if (secretKey == "Secret not found")
             {
                 logging.LogException("Secret does not exist in key vault.");
-                return new Response(success, secretKey);
+                return new Response(success, secretKey, "");
             }
 
             // Convert key 
@@ -92,7 +92,7 @@ public class DecryptAndDeleteSecret
             if (blobName == "")
             {
                 logging.LogException("Secret does not exist in storage container.");
-                return new Response(success, "Secret not found");
+                return new Response(success, "Secret not found", "");
             }
 
             // Get json data from blob
@@ -100,7 +100,7 @@ public class DecryptAndDeleteSecret
             if (jsonData == "Blob not found")
             {
                 logging.LogException("Error retreiving secret from storage container.");
-                return new Response(success, "Secret not found");
+                return new Response(success, "Secret not found", "");
             }
 
             // Convert to userSecret format
@@ -119,7 +119,7 @@ public class DecryptAndDeleteSecret
                 if (!string.Equals(request.OIDReceiver, userSecret.OIDReceiver))
                 {
                     logging.LogEvent($"The user with OID '{request.OIDReceiver}' is not the intended receiver of the secret with ID: '{request.Id}'. Access denied.");
-                    return new Response(success, "The current user in is not the intended receiver of this secret.");
+                    return new Response(success, "The current user in is not the intended receiver of this secret.", "");
                 }
             }
 
@@ -136,7 +136,7 @@ public class DecryptAndDeleteSecret
                 logging.LogEvent($"Secret succesfully accessed by anonymous user and deleted from storage. ID: '{request.Id}'.");
             }
 
-            return new Response(success, plaintext);
+            return new Response(success, plaintext, userSecret.OIDSender);
         }
         public async Task<string> GetJsonDataFromBlob(string blobName)
         {
