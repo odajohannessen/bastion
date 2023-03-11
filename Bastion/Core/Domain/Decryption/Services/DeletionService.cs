@@ -2,8 +2,6 @@
 using System.Text.Json.Serialization;
 using Azure.Storage.Blobs;
 using System.Text;
-using Microsoft.Azure.KeyVault;
-using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Core;
 using Azure.Storage.Blobs.Models;
