@@ -89,16 +89,25 @@ public class DeletionService : IDeletionService
         string keyVaultName = "kvbastion-secrets"; 
         string uri = $"https://{keyVaultName}.vault.azure.net";
 
+        var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
+        SecretClient client = new SecretClient(new Uri(uri), credentials, options);
         try
         {
-            var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
-            SecretClient client = new SecretClient(new Uri(uri), credentials, options);
             await client.StartDeleteSecretAsync(id);
         }
         catch (Exception ex)
         {
             logging.LogException($"Error deleting key: '{ex.Message}'. ID: '{id}'.");
             return false;
+        }
+        try
+        {
+            client.PurgeDeletedSecret(id);
+        }
+        catch (Exception e)
+        {
+            logging.LogException($"Error purging deleted key: '{e.Message}'");
+            throw new Exception($"Error purging deleted key: '{e.Message}'");
         }
 
         return true;

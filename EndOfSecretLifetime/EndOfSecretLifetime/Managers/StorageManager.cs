@@ -93,7 +93,15 @@ public class StorageManager
             logging.LogException($"Error deleting key: '{e.Message}'");
             throw new Exception($"Error deleting key: '{e.Message}'");
         }
-
+        try
+        {
+            client.PurgeDeletedSecret(keyName);
+        }
+        catch (Exception e)
+        {
+            logging.LogException($"Error purging deleted key: '{e.Message}'");
+            throw new Exception($"Error purging deleted key: '{e.Message}'");
+        }
         logging.LogEvent($"Deleted key with ID: '{keyName}'");
 
         return true;
@@ -114,7 +122,7 @@ public class StorageManager
                 int from = secretName.IndexOf("--") + 2;
                 int to = secretName.IndexOf(".");
                 string expireTimeStampString = secretName.Substring(from, to - from);
-                DateTime expireTimeStamp = DateTime.Parse(expireTimeStampString);
+                DateTime expireTimeStamp = DateTime.Parse(expireTimeStampString).ToUniversalTime(); // TODO: Add utc in parsing? 
 
                 // If secret is expired, add it to the dict
                 if (expireTimeStamp < DateTime.UtcNow)
