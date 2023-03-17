@@ -5,7 +5,7 @@ public class UserInput
     public UserInput(string inputSecretPlainText, int inputLifeTime, string oidSender="", string oidReceiver="")
     {
         Id = Guid.NewGuid();
-        TimeStamp = DateTime.Now;
+        TimeStamp = DateTime.UtcNow;
         Plaintext = inputSecretPlainText;
         Lifetime = inputLifeTime;
         OIDSender = oidSender;
