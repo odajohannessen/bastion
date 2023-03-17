@@ -71,14 +71,22 @@
                     </svg>
                     Copy one-click link
                 </button>
-                <!-- One-click link: <br /> -->
+
+                <br /> <br />
                 @if (id != Guid.Empty)
                 {
-                    @url
+                    <div>@url</div>
                 }
                 else
                 {
-                    @message
+                    <div>@message</div>
+                }
+
+                @if (!DisplayAlert)
+                {
+                    <div class="alert alert-danger fade-in" role="alert">
+                        Error storing secret
+                    </div>
                 }
             </div>
         }
@@ -120,15 +128,23 @@
                 </svg>
                 Copy one-click link
             </button>
-            <!-- One-click link: <br /> -->
-        @if (id != Guid.Empty)
-        {
-            @url
-        }
-        else 
-        {
-            @message
-        }
+            <br/> <br/>
+            @if (id != Guid.Empty)
+            {
+                <div>@url</div>
+            }
+            else 
+            {
+                <div>@message</div>
+            }
+
+            @if (!DisplayAlert)
+            {
+                <div class="alert alert-danger fade-in" role="alert">
+                    Error storing secret
+                </div>
+            }
+
         </div> 
     </NotAuthorized>
 </AuthorizeView>
@@ -138,7 +154,7 @@
     private UserInputModel userInputModel = new();
     private AuthUserInputModel authUserInputModel = new();
     private Guid id = default;
-    private string url = $"https://bastion-bouvet.azurewebsites.net/";
+    private string url = "";
     string message = "";
 
     bool authenticated;
@@ -148,6 +164,9 @@
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    [Parameter]
+    public bool DisplayAlert { get; set; } = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -178,7 +197,6 @@
         var user = authenticationState.User;
         authenticated = user.Identity?.IsAuthenticated ?? false;
 
-        // TODO: Separate out into helper functions?
         if (authenticated)
         {
             if (userInfo == null)
@@ -187,7 +205,6 @@
             }
             string OIDSender = userInfo.Id;
 
-
             // Create user input
             var responseInput = await mediator.Send(new CreateUserInput.Request(authUserInputModel.SecretPlaintext, authUserInputModel.Lifetime, OIDSender, authUserInputModel.OIDReceiver));
 
@@ -195,30 +212,65 @@
             {
                 // Create UserInputDto
                 UserInput userInput = responseInput.userInput;
-                id = userInput.Id;
-                url = $"https://bastion-bouvet.azurewebsites.net/{id.ToString()}";
-
                 UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.Plaintext, userInput.Lifetime, userInput.OIDSender, userInput.OIDReceiver);
 
                 // Encrypt and store data
-                var response = mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
+                var response = await mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
+
+                if (response.success)
+                {
+                    id = userInput.Id;
+                    url = $"https://bastion-bouvet.azurewebsites.net/{id.ToString()}";
+                    StateHasChanged();
+                }
+                else
+                {
+                    message = "";
+                    url = "";
+                    DisplayAlert = false;
+                    StateHasChanged();
+                }
+            }
+            else
+            {
+                message = "";
+                url = "";
+                DisplayAlert = false;
+                StateHasChanged();
             }
         }
         else
         {
             var responseInput = await mediator.Send(new CreateUserInput.Request(userInputModel.SecretPlaintext, userInputModel.Lifetime));
 
-            if (responseInput.success)
+            if (responseInput.success) // TODO: Rewrite as helper method?
             {
                 // Create UserInputDto
                 UserInput userInput = responseInput.userInput;
-                id = userInput.Id;
-                url = $"https://bastion-bouvet.azurewebsites.net/{id.ToString()}";
-
                 UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.Plaintext, userInput.Lifetime);
 
                 // Encrypt and store data
-                var response = mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
+                var response = await mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
+                if (response.success)
+                {
+                    id = userInput.Id;
+                    url = $"https://bastion-bouvet.azurewebsites.net/{id.ToString()}";
+                    StateHasChanged();
+                }
+                else
+                {
+                    message = "";
+                    url = "";
+                    DisplayAlert = false;
+                    StateHasChanged();
+                }
+            }
+            else
+            {
+                message = "";
+                url = "";
+                DisplayAlert = false;
+                StateHasChanged();
             }
         }
     }

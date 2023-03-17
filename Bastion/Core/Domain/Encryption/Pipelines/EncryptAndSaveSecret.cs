@@ -12,7 +12,7 @@ namespace Bastion.Core.Domain.Encryption.Pipelines;
 public class EncryptAndSaveSecret
 {
     public record Request(UserInputDto userInputDto) : IRequest<Response>; 
-    public record Response(byte[] CiphertextBytes, byte[] Key, byte[] IV, string Id);
+    public record Response(bool success, string Id);
 
     public class Handler : IRequestHandler<Request, Response>
     {
@@ -29,6 +29,7 @@ public class EncryptAndSaveSecret
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
+            bool success = true;
             (byte[], byte[], byte[]) encryptionResponse;
             string ciphertext;
             UserSecret userSecret;
@@ -71,11 +72,11 @@ public class EncryptAndSaveSecret
             if (!storageResponse.Item1)
             {
                 logging.LogException($"Storage of secret failed. ID: '{request.userInputDto.Id}'.");
-                throw new Exception("Problems with storing");
+                success = false;
             }
             logging.LogEvent($"Secret successfully stored for anonymous user. ID: '{request.userInputDto.Id}'.");
 
-            return new Response(encryptionResponse.Item1, encryptionResponse.Item2, encryptionResponse.Item3, userSecret.Id.ToString());
+            return new Response(success, userSecret.Id.ToString());
         }
     }
 

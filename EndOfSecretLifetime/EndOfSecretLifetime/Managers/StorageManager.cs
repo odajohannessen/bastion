@@ -93,6 +93,7 @@ public class StorageManager
             logging.LogException($"Error deleting key: '{e.Message}'");
             throw new Exception($"Error deleting key: '{e.Message}'");
         }
+
         logging.LogEvent($"Deleted key with ID: '{keyName}'");
 
         return true;
@@ -116,7 +117,7 @@ public class StorageManager
                 DateTime expireTimeStamp = DateTime.Parse(expireTimeStampString);
 
                 // If secret is expired, add it to the dict
-                if (expireTimeStamp < DateTime.UtcNow) // TODO: sjekk at timestamp som settes er utc 
+                if (expireTimeStamp < DateTime.UtcNow)
                 {
                     // Extract id
                     int fromId = 0;
