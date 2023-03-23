@@ -21,7 +21,7 @@ public class TimerTrigger
     }
 
     [FunctionName("TimerTrigger")]
-    public async Task Run([TimerTrigger("*/30 * * * * *"
+    public async Task Run([TimerTrigger("* * * * * *"
     #if DEBUG
         , RunOnStartup=true
     #endif
