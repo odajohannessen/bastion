@@ -14,5 +14,5 @@ public class AuthUserInputModel : PageModel
     public int Lifetime { get; set; } = 1;
 
     [Required]
-    public string OIDReceiver { get; set; } = "0";
+    public string OIDReceiver { get; set; }
 }
