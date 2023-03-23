@@ -12,6 +12,10 @@
 @using Microsoft.Identity.Web.UI;
 @using Microsoft.Identity.Web
 @using Microsoft.Graph
+@using System.Text.RegularExpressions;
+@using System.IdentityModel.Tokens.Jwt;
+@using Microsoft.IdentityModel.Tokens;
+@using System.Text;
 @inject Microsoft.Graph.GraphServiceClient GraphServiceClient
 @inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
 @inject CopyToClipboardManager ClipBoardManager
@@ -37,6 +41,7 @@
                 <label>
                     Receiver:
                     <InputSelect class="form-select" @bind-Value="authUserInputModel.OIDReceiver">
+                        <option value="0">Select receiver(s)</option>
                         @foreach (var receiver in users)
                         {
                             <option value="@receiver.Id">@receiver.DisplayName</option>
@@ -176,16 +181,46 @@
 
         if (authenticated)
         {
-            try
+
+            // Check issuer/tenant id and audience in token
+            var scopeClaimValue = user.Claims;
+
+            if (scopeClaimValue != null)
             {
-                // Get list of all users, and logged in user
-                users = await GraphServiceClient.Users.Request().GetAsync();
-                userInfo = await GraphServiceClient.Me.Request().GetAsync();
+                foreach (var claim in user.Claims)
+                {
+                    var claimV = claim.Value;
+                    var claimB = claim.Issuer;
+                }
+                var test = user.Identity;
             }
-            catch (Exception ex)
+
+            // TODO: Check audience
+
+            // The issuer/tenant id in the token should be equal to the tenant id of the app registration
+            var tokenTenantId = user.GetTenantId();
+            bool issuer;
+            string sample = Environment.GetEnvironmentVariable("AppRegistrationTenantId");
+            if (tokenTenantId == sample);
+                issuer = true;
+
+            if (!issuer)
             {
-                ConsentHandler.HandleException(ex);
+                throw new Exception("Token error"); // TODO: Correct way to handle this?
             }
+
+            // Get list of all users, and logged in user
+            users = await GraphServiceClient.Users.Request().GetAsync();
+            userInfo = await GraphServiceClient.Me.Request().GetAsync();
+            // TODO: Should we check the token here? 
+            // Validate received access tokens in your app/api
+            // Or somewhere else? 
+            // Any api secured with Azure AD will require a valid access token
+            // Microsoft issues access tokens in JWT format
+            // JWT: Header, payload, signautre (must be verified)
+            // Make sure the audience claim is your app id, means that the access token is meant for you:
+            // the audience must identify the service reading the token
+            // The issuer must be the trusted issue (an azure ad tenant)
         }
     }
 
