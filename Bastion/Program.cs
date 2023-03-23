@@ -16,7 +16,6 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.AspNetCore.Rewrite;
-using Microsoft.Graph.ExternalConnectors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,9 +46,9 @@ builder.Services.AddScoped<CopyToClipboardManager>();
 //    options.FallbackPolicy = options.DefaultPolicy;
 //});
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(); 
 
-// Prompt user to select a Microsoft account when logging in
+// Prompt user to select Microsoft account when logging in
 builder.Services.Configure<OpenIdConnectOptions>(options =>
 {
     options.Events.OnRedirectToIdentityProvider = context =>
@@ -65,13 +64,13 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.G
 var app = builder.Build();
 
 // Redirect after logging in, doesn't work
-//app.UseRewriter(
-//    new RewriteOptions().Add(
-//        context => {
-//            if (context.HttpContext.Request.Path == "/signin-oidc")//"/MicrosoftIdentity/Account/SignIn")
-//            { context.HttpContext.Response.Redirect("/authenticated"); }
-//        })
-//);
+app.UseRewriter(
+    new RewriteOptions().Add(
+        context => {
+            if (context.HttpContext.Request.Path == "/signin-oidc")//"/MicrosoftIdentity/Account/SignIn")
+            { context.HttpContext.Response.Redirect("/authenticated"); }
+        })
+);
 
 // Redirect after logging out
 app.UseRewriter(
