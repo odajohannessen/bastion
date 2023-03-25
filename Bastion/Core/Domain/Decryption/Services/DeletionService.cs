@@ -102,6 +102,7 @@ public class DeletionService : IDeletionService
         }
         try
         {
+            await Task.Delay(TimeSpan.FromSeconds(1)); // Test with 1 second delay to avoid conflict with deletion
             client.PurgeDeletedSecret(id);
         }
         catch (Exception e)
