@@ -37,6 +37,7 @@
                 <label>
                     Receiver:
                     <InputSelect class="form-select" @bind-Value="authUserInputModel.OIDReceiver">
+                        <option value="0">Select receiver(s)</option>
                         @foreach (var receiver in users)
                         {
                             <option value="@receiver.Id">@receiver.DisplayName</option>
