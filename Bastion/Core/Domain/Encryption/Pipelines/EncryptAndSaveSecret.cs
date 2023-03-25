@@ -74,7 +74,11 @@ public class EncryptAndSaveSecret
                 logging.LogException($"Storage of secret failed. ID: '{request.userInputDto.Id}'.");
                 success = false;
             }
-            logging.LogEvent($"Secret successfully stored for anonymous user. ID: '{request.userInputDto.Id}'.");
+
+            if (success)
+            {
+                logging.LogEvent($"Secret successfully stored for anonymous user. ID: '{request.userInputDto.Id}'.");
+            }
 
             return new Response(success, userSecret.Id.ToString());
         }
