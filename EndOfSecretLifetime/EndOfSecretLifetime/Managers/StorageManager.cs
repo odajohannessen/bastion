@@ -95,6 +95,7 @@ public class StorageManager
         }
         try
         {
+            await Task.Delay(TimeSpan.FromSeconds(1));
             client.PurgeDeletedSecret(keyName);
         }
         catch (Exception e)
