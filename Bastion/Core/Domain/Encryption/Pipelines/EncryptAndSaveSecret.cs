@@ -34,7 +34,7 @@ public class EncryptAndSaveSecret
             string ciphertext;
             UserSecret userSecret;
             string sender = request.userInputDto.OIDSender;
-            string receiver = request.userInputDto.OIDReceiver;
+            string[]? receiver = request.userInputDto.OIDReceiver;
 
             if (request.userInputDto.OIDSender.IsNullOrEmpty() && request.userInputDto.OIDReceiver.IsNullOrEmpty())
             {
@@ -47,7 +47,7 @@ public class EncryptAndSaveSecret
             }
             else
             {
-                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OID '{request.userInputDto.OIDReceiver}' has been received. ID: '{request.userInputDto.Id}'.");
+                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{request.userInputDto.OIDReceiver}' has been received. ID: '{request.userInputDto.Id}'.");
             }
 
             // Encrypt data

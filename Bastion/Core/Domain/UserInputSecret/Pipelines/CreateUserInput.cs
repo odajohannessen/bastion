@@ -6,7 +6,7 @@ namespace Bastion.Core.Domain.UserInputSecret.Pipelines;
 
 public class CreateUserInput
 {
-    public record Request(string inputSecretPlaintext, int inputLifeTime, string oidSender = "", string oidReceiver = "") : IRequest<Response>;
+    public record Request(string inputSecretPlaintext, int inputLifeTime, string oidSender = "", string[]? oidReceiver = null) : IRequest<Response>;
 
     public record Response(bool success, UserInput userInput);
 

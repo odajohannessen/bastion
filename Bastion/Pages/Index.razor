@@ -36,7 +36,7 @@
                 <br /> <br />
                 <label>
                     Receiver:
-                    <InputSelect class="form-select" @bind-Value="authUserInputModel.OIDReceiver">
+                    <InputSelect multiple @bind-Value="authUserInputModel.OIDReceiver" class="form-select">
                         <option value="0">Select receiver(s)</option>
                         @foreach (var receiver in users)
                         {
@@ -99,14 +99,13 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
             <label>
-                <InputTextArea id="plaintext" @bind-Value="userInputModel.SecretPlaintext" />
+                <InputTextArea id="plaintext" @bind-Value="userInputModel.SecretPlaintext" class="form-range"/>
             </label>
             <br/> <br/>
             <div>
             <label>
                 Lifetime: <br />
-                <!--<InputNumber id="lifetime" @bind-Value="userInputModel.Lifetime" />-->
-                <InputRadioGroup Name="radioGroup" @bind-Value="userInputModel.Lifetime" >
+                <InputRadioGroup Name="radioGroup" @bind-Value="userInputModel.Lifetime">
                     <InputRadio Value="1"/> 1 hour 
                     <InputRadio Value="8"/> 8 hours 
                     <InputRadio Value="24"/> 24 hours
@@ -168,6 +167,12 @@
 
     [Parameter]
     public bool DisplayAlert { get; set; } = true;
+
+    // Handle update of receivers
+    //private void SelectedReceiversChanged(ChangeEventArgs e)
+    //{
+    //    SelectedReceiversChanged = (string[])e.Value;
+    //}
 
     protected override async Task OnInitializedAsync()
     {

@@ -2,7 +2,7 @@
 
 public class UserInput 
 {
-    public UserInput(string inputSecretPlainText, int inputLifeTime, string oidSender="", string oidReceiver="")
+    public UserInput(string inputSecretPlainText, int inputLifeTime, string oidSender="", string[]? oidReceiver = null)
     {
         Id = Guid.NewGuid();
         TimeStamp = DateTime.UtcNow;
@@ -17,5 +17,5 @@ public class UserInput
     public string Plaintext { get; protected set; } 
     public int Lifetime { get; protected set; }
     public string OIDSender { get; protected set; }
-    public string OIDReceiver { get; protected set; }
+    public string[]? OIDReceiver { get; protected set; }
 }

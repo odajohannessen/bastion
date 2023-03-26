@@ -116,10 +116,13 @@ public class DecryptAndDeleteSecret
             {
                 //bool successHash = HashingHelper.VerifyHash(request.OIDReceiver, userSecret.OIDReceiver);
                 //if (!successHash)
-                if (!string.Equals(request.OIDReceiver, userSecret.OIDReceiver))
+
+                // Check if the OID of the current user is one of the intended receivers
+                // Or if they have already viewed it
+                bool receiverStatus = CheckSecretReceiver(blobName, request.OIDReceiver);
+                if (receiverStatus)
                 {
-                    logging.LogEvent($"The user with OID '{request.OIDReceiver}' is not the intended receiver of the secret with ID: '{request.Id}'. Access denied.");
-                    return new Response(success, "The current user in is not the intended receiver of this secret.", "");
+                    return new Response(success, "This user is not an intended recipient, or has already viewed this secret.", "");
                 }
             }
 
@@ -127,13 +130,30 @@ public class DecryptAndDeleteSecret
             plaintext = await DecryptionService.DecryptSecret(ciphertext, secretKeyValue, userSecret.IV);
             logging.LogEvent($"Secret successfully decrypted. ID: {request.Id}");
 
-            // Delete secret and key
-            success = await DeletionService.DeleteSecret(request.Id, blobName);
+            // Delete secret and key if all receivers have viewed it.
+            bool viewerStatus = CheckSecretViewerStatus(blobName);
+            if (viewerStatus)
+            {
+                success = await DeletionService.DeleteSecret(request.Id, blobName);
+            }
+            else
+            { 
+                success = true;
+            }
 
             if (success) 
             {
-                // TODO: Update logging message in case some one is logged in
-                logging.LogEvent($"Secret succesfully accessed by anonymous user and deleted from storage. ID: '{request.Id}'.");
+                if (request.OIDReceiver.IsNullOrEmpty())
+                {
+                    logging.LogEvent($"Secret succesfully accessed by anonymous user and deleted from storage. ID: '{request.Id}'.");
+                }
+                else
+                {
+                    if (viewerStatus)
+                        logging.LogEvent($"Secret succesfully accessed by user with OID ${request.OIDReceiver} and deleted from storage. ID: '{request.Id}'.");
+                    else
+                        logging.LogEvent($"Secret succesfully accessed by user with OID ${request.OIDReceiver}. ID: '{request.Id}'.");
+                }
             }
 
             return new Response(success, plaintext, userSecret.OIDSender);
@@ -198,5 +218,66 @@ public class DecryptAndDeleteSecret
             return blobName;
         }
 
+        // Return false if OIDReceiver has not yet viewed the secret, true if they have
+        // Will also return true if the receiver is not found among the receivers
+        public static bool CheckSecretReceiver(string blobName, string OIDReceiver)
+        {
+            var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
+
+            string StorageContainerName = "secrets-test";
+            string StorageAccountName = "sabastion";
+            string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
+
+            BlobClient client = new BlobClient(new Uri(uriSA), credentials);
+            BlobProperties properties = client.GetProperties();
+
+            IDictionary<string, string> receiver = new Dictionary<string, string>();
+            bool receiverFound = false;
+            // Check if the receiver has viewed the secret 
+            foreach (var metadataItem in properties.Metadata) 
+            {
+                // If receiver's OID is present in the metadata, they have not viewed it yet
+                // If the OID is not in the metadata, they have either already viewed it, or they are not an intended recipient
+                if (metadataItem.Value != OIDReceiver)
+                {
+                    receiver.Add(metadataItem.Key, metadataItem.Value);
+                }
+                else
+                { 
+                    receiverFound = true;
+                }
+            }
+
+            if (receiverFound)
+            {
+                // Remove the OID from the metadata by setting a new dictionary as metadata, excluding the current user
+                client.SetMetadata(receiver);
+                return false;
+            }
+
+            return true;
+        }
+
+        // Check if all receivers have opened and viewed the secret
+        // Return false if not, true if they have
+        public static bool CheckSecretViewerStatus(string blobName)
+        {
+            var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
+
+            string StorageContainerName = "secrets-test";
+            string StorageAccountName = "sabastion";
+            string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
+
+            BlobClient client = new BlobClient(new Uri(uriSA), credentials);
+            BlobProperties properties = client.GetProperties();
+
+            // If metadata count is zero, all receivers have viewed it 
+            if (properties.Metadata.Count == 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

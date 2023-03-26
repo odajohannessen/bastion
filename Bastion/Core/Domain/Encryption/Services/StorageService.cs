@@ -8,6 +8,7 @@ using Azure.Storage.Blobs.Models;
 using Azure;
 using Bastion.Helpers;
 using Bastion.Managers;
+using System.Collections;
 
 namespace Bastion.Core.Domain.Encryption.Services;
 
@@ -54,7 +55,7 @@ public class StorageService : IStorageService
         return (true, id);
     }
 
-    // Stores the jsonData string in blob storage
+    // Stores the jsonData string in blob storage and adds metadata of receivers to the blob
     private async Task<bool> StoreSecretInBlobStorage(string secretJsonFormat, UserSecret userSecret)
     {
         if (secretJsonFormat == null || userSecret == null) 
@@ -77,6 +78,30 @@ public class StorageService : IStorageService
             byte[] secretByteArray = Encoding.UTF8.GetBytes(secretJsonFormat);
             MemoryStream ms = new MemoryStream(secretByteArray);
             await client.UploadAsync(ms);
+
+            // Update receivers in metadata if receivers array in user secret is not null
+            if (userSecret.OIDReceiver != null) 
+            {
+                IDictionary<string, string> receivers = new Dictionary<string, string>();
+                int receiverNumber = 0;
+                foreach (string receiver in userSecret.OIDReceiver) 
+                {
+                    string receiverKey = "receiver" + receiverNumber.ToString();
+                    receivers.Add(receiverKey, receiver);
+                    receiverNumber++;
+                }
+                Response<BlobInfo> response = client.SetMetadata(receivers);
+                var responseDetails = response.GetRawResponse();
+                if (responseDetails.Status == 200)
+                {
+                    logging.LogEvent($"Metadata successfully uploaded to secret with ID: '{userSecret.Id}'.");
+                }
+                else
+                {
+                    logging.LogException($"Error uploading metadata to secret with ID: '{userSecret.Id}'");
+                    return false;
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -132,7 +157,7 @@ public class StorageService : IStorageService
     public static string SecretStorageFormat(UserSecret userSecret)
     {
         // Exclude key from jsonData which is to be stored
-        UserSecretJsonFormat secretJsonFormat = new UserSecretJsonFormat(userSecret.Id, userSecret.Ciphertext, userSecret.Lifetime, userSecret.TimeStamp, userSecret.IV, userSecret.OIDSender, userSecret.OIDReceiver);
+        UserSecretJsonFormat secretJsonFormat = new UserSecretJsonFormat(userSecret.Id, userSecret.Ciphertext, userSecret.Lifetime, userSecret.TimeStamp, userSecret.IV, userSecret.OIDSender);
         string jsonData = JsonConvert.SerializeObject(secretJsonFormat);
 
         return jsonData;

@@ -103,20 +103,20 @@
 
 
         // Create user input
-        var responseInput = await mediator.Send(new CreateUserInput.Request(userInputModel.SecretPlaintext, userInputModel.Lifetime, OIDSender, userInputModel.OIDReceiver));
+        //var responseInput = await mediator.Send(new CreateUserInput.Request(userInputModel.SecretPlaintext, userInputModel.Lifetime, OIDSender, userInputModel.OIDReceiver));
 
-        if (responseInput.success)
-        {
-            // Create UserInputDto
-            UserInput userInput = responseInput.userInput;
-            id = userInput.Id;
-            url = $"https://bastion-bouvet.azurewebsites.net/{id.ToString()}";
+        //if (responseInput.success)
+        //{
+        //    // Create UserInputDto
+        //    UserInput userInput = responseInput.userInput;
+        //    id = userInput.Id;
+        //    url = $"https://bastion-bouvet.azurewebsites.net/{id.ToString()}";
 
-            UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.Plaintext, userInput.Lifetime, userInput.OIDSender, userInput.OIDReceiver);
+        //    UserInputDto userInputDto = new UserInputDto(userInput.Id, userInput.TimeStamp, userInput.Plaintext, userInput.Lifetime, userInput.OIDSender, userInput.OIDReceiver);
 
-            // Encrypt and store data 
-            var response = mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
-        }
+        //    // Encrypt and store data 
+        //    var response = mediator.Send(new EncryptAndSaveSecret.Request(userInputDto));
+        //}
     }
 
     // Get list of all users, and logged in user

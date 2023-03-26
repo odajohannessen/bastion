@@ -8,7 +8,7 @@ public class UserSecret
     {
     }
 
-    public UserSecret(Guid id, string ciphertext, int inputLifetime, DateTime timeStamp, byte[] key, byte[] iv, string oidSender="", string oidReceiver="")
+    public UserSecret(Guid id, string ciphertext, int inputLifetime, DateTime timeStamp, byte[] key, byte[] iv, string oidSender = "", string[] oidReceiver = null)
     {
         Id = id;
         TimeStamp = timeStamp;
@@ -29,6 +29,6 @@ public class UserSecret
     public byte[] Key { get; protected set; }
     public byte[] IV { get; protected set;}
     public string OIDSender { get; protected set; }
-    public string OIDReceiver { get; protected set; }
+    public string[]? OIDReceiver { get; protected set; }
 }
 

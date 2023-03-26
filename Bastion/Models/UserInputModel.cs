@@ -7,7 +7,7 @@ public class UserInputModel : PageModel
 {
     [Required]
     [StringLength(5000, ErrorMessage = "Message is too long")]
-    public string SecretPlaintext { get; set; } = "";
+    public string SecretPlaintext { get; set; }
 
     [Required]
     [Range(1, 24)]
