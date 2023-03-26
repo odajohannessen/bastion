@@ -6,6 +6,9 @@ using Bastion.Managers;
 using System.Text;
 using Bastion.Helpers;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Graph;
+using System.Security.Cryptography;
 
 namespace Bastion.Core.Domain.Encryption.Pipelines;
 
@@ -47,7 +50,7 @@ public class EncryptAndSaveSecret
             }
             else
             {
-                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{request.userInputDto.OIDReceiver}' has been received. ID: '{request.userInputDto.Id}'.");
+                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{request.userInputDto.OIDReceiver.ToString()}' has been received. ID: '{request.userInputDto.Id}'.");
             }
 
             // Encrypt data
@@ -75,10 +78,10 @@ public class EncryptAndSaveSecret
                 success = false;
             }
 
-            if (success)
-            {
+            if (success && request.userInputDto.OIDSender.IsNullOrEmpty() && request.userInputDto.OIDReceiver.IsNullOrEmpty())
                 logging.LogEvent($"Secret successfully stored for anonymous user. ID: '{request.userInputDto.Id}'.");
-            }
+            else if (success && !request.userInputDto.OIDSender.IsNullOrEmpty() && !request.userInputDto.OIDReceiver.IsNullOrEmpty())
+                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{request.userInputDto.OIDReceiver.ToString()}' has been received.ID: '{request.userInputDto.Id}");
 
             return new Response(success, userSecret.Id.ToString());
         }
