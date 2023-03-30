@@ -22,7 +22,7 @@ namespace Bastion.Core.Domain.Decryption.Pipelines;
 
 public class DecryptAndDeleteSecret
 {
-    public record Request(string Id, string OIDReceiver="") : IRequest<Response>;
+    public record Request(string Id, string OIDUser="") : IRequest<Response>;
     public record Response(bool success, string Plaintext, string OIDSender);
 
     public class Handler : IRequestHandler<Request, Response>
@@ -40,9 +40,9 @@ public class DecryptAndDeleteSecret
 
         public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
         {
-            if (!request.OIDReceiver.IsNullOrEmpty())
+            if (!request.OIDUser.IsNullOrEmpty())
             {
-                logging.LogEvent($"Starting handling of request for user with OID '{request.OIDReceiver}' for accessing secret. ID: '{request.Id}'.");
+                logging.LogEvent($"Starting handling of request for user with OID '{request.OIDUser}' for accessing secret. ID: '{request.Id}'.");
             }
             else
             {
@@ -69,6 +69,22 @@ public class DecryptAndDeleteSecret
                 logging.LogTrace($"Guid secret format registered.");
             }
 
+            // Get blobname from storage container
+            string blobName = GetBlobNameFromStorageContainer(request.Id);
+            if (blobName == "")
+            {
+                logging.LogException("Secret does not exist in storage container.");
+                return new Response(success, "Secret not found", "");
+            }
+            // Check if secret has receivers, returns true if metadata count is 0
+            bool hasReceivers = CheckSecretViewerStatus(blobName);
+            // If the secret has receivers, but the user is not logged in, return response requiring login
+            if (!hasReceivers && request.OIDUser == "") 
+            {
+                logging.LogEvent($"Anonymous user trying to access a secret with defined receiver(s). Id: '{request.Id}'.");
+                return new Response(success, "Login required", "");
+            }
+
             string plaintext;
             byte[] ciphertext;
             byte[] secretKeyValue;
@@ -87,14 +103,6 @@ public class DecryptAndDeleteSecret
             // Convert key 
             secretKeyValue = Convert.FromBase64String(secretKey);
 
-            // Get blobname from storage container
-            string blobName = GetBlobNameFromStorageContainer(request.Id);
-            if (blobName == "")
-            {
-                logging.LogException("Secret does not exist in storage container.");
-                return new Response(success, "Secret not found", "");
-            }
-
             // Get json data from blob
             string jsonData = await GetJsonDataFromBlob(blobName);
             if (jsonData == "Blob not found")
@@ -112,14 +120,14 @@ public class DecryptAndDeleteSecret
             ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
 
             // Confirm the user who has requested to see the secret is the intended receive
-            if (!request.OIDReceiver.IsNullOrEmpty())
+            if (!request.OIDUser.IsNullOrEmpty())
             {
                 //bool successHash = HashingHelper.VerifyHash(request.OIDReceiver, userSecret.OIDReceiver);
                 //if (!successHash)
 
                 // Check if the OID of the current user is one of the intended receivers
                 // Or if they have already viewed it
-                bool receiverStatus = CheckSecretReceiver(blobName, request.OIDReceiver);
+                bool receiverStatus = CheckSecretReceiver(blobName, request.OIDUser);
                 if (receiverStatus)
                 {
                     return new Response(success, "This user is not an intended recipient, or has already viewed this secret.", "");
@@ -143,16 +151,16 @@ public class DecryptAndDeleteSecret
 
             if (success) 
             {
-                if (request.OIDReceiver.IsNullOrEmpty())
+                if (request.OIDUser.IsNullOrEmpty())
                 {
                     logging.LogEvent($"Secret succesfully accessed by anonymous user and deleted from storage. ID: '{request.Id}'.");
                 }
                 else
                 {
                     if (viewerStatus)
-                        logging.LogEvent($"Secret succesfully accessed by user with OID ${request.OIDReceiver} and deleted from storage. ID: '{request.Id}'.");
+                        logging.LogEvent($"Secret succesfully accessed by user with OID ${request.OIDUser} and deleted from storage. ID: '{request.Id}'.");
                     else
-                        logging.LogEvent($"Secret succesfully accessed by user with OID ${request.OIDReceiver}. ID: '{request.Id}'.");
+                        logging.LogEvent($"Secret succesfully accessed by user with OID ${request.OIDUser}. ID: '{request.Id}'.");
                 }
             }
 
