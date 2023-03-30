@@ -12,8 +12,10 @@
 @using Microsoft.Identity.Web.UI;
 @using Microsoft.Identity.Web
 @using Microsoft.Graph
+@using System.Security.Claims;
 @inject Microsoft.Graph.GraphServiceClient GraphServiceClient
 @inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+@inject Microsoft.Identity.Web.ITokenAcquisition TokenAcquisitionService
 @inject CopyToClipboardManager ClipBoardManager
 
 <PageTitle>Bastion</PageTitle>
@@ -44,7 +46,6 @@
                         }
                     </InputSelect>
                 </label>
-                 
                 <div>
                     <br />
                     <label>
@@ -66,10 +67,7 @@
             <h1>Share the encrypted secret</h1>
             <div>
                 <button class="btn btn-primary" @onclick="CopyToClipboard">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
-                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z" />
-                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
-                    </svg>
+                    <span class="oi oi-clipboard" aria-hidden="true"></span>
                     Copy one-click link
                 </button>
 
@@ -110,7 +108,6 @@
                     <InputRadio Value="8"/> 8 hours 
                     <InputRadio Value="24"/> 24 hours
                 </InputRadioGroup>
-  
             </label>
             <br/><br/>
             <button class="btn btn-primary" type="submit">Encrypt</button>
@@ -122,10 +119,7 @@
         <h1>Share the encrypted secret</h1>
         <div>
             <button class="btn btn-primary" @onclick="CopyToClipboard">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
-                    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z" />
-                    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
-                </svg>
+                <span class="oi oi-clipboard" aria-hidden="true"></span>
                 Copy one-click link
             </button>
             <br/> <br/>
@@ -151,6 +145,9 @@
 
 
 @code {
+    [Inject]
+    private IConfiguration Configuration { get; set; }
+
     private UserInputModel userInputModel = new();
     private AuthUserInputModel authUserInputModel = new();
     private Guid id = default;
@@ -165,14 +162,10 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
+    private IEnumerable<Claim> claims = Enumerable.Empty<Claim>();
+
     [Parameter]
     public bool DisplayAlert { get; set; } = true;
-
-    // Handle update of receivers
-    //private void SelectedReceiversChanged(ChangeEventArgs e)
-    //{
-    //    SelectedReceiversChanged = (string[])e.Value;
-    //}
 
     protected override async Task OnInitializedAsync()
     {
@@ -184,6 +177,30 @@
         {
             try
             {
+                // Check claims tenant and issuer
+                // Tenant should be the directory tenant ID of the app registration of Bastion
+                // Issuer should be Microsoft and tenant ID
+                string issuer = "";
+                claims = user.Claims;
+                //var test = claims.First(c => c.Type == "Issuer");
+                foreach (Claim claim in claims)
+                {
+                    issuer = claim.Issuer;
+                    break;
+                }
+                string? tenantId = user.GetTenantId();
+
+                string TenantId = Configuration["TenantId"];
+                string Issuer = Configuration["Issuer"];
+
+                if (tenantId != TenantId || issuer != Issuer)
+                {
+                    throw new Exception("Invalid tenantId or issuer.");
+                }
+
+                // Doesn't work
+                //var claimtest = user.Claims.First(c => c.Type == "aud");
+
                 // Get list of all users, and logged in user
                 users = await GraphServiceClient.Users.Request().GetAsync();
                 userInfo = await GraphServiceClient.Me.Request().GetAsync();
@@ -210,6 +227,16 @@
                 throw new Exception("user cannot be null.");
             }
             string OIDSender = userInfo.Id;
+
+            // Check that default value is not chosen, remove it if it is
+            foreach (string receiver in authUserInputModel.OIDReceiver)
+            {
+                if (receiver == "0")
+                {
+                    authUserInputModel.OIDReceiver = authUserInputModel.OIDReceiver.Where(val => val != "0").ToArray();
+                    break;
+                }
+            }
 
             // Create user input
             var responseInput = await mediator.Send(new CreateUserInput.Request(authUserInputModel.SecretPlaintext, authUserInputModel.Lifetime, OIDSender, authUserInputModel.OIDReceiver));
