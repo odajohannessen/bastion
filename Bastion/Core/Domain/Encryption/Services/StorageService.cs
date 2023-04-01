@@ -8,7 +8,9 @@ using Azure.Storage.Blobs.Models;
 using Azure;
 using Bastion.Helpers;
 using Bastion.Managers;
-using System.Collections;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Microsoft.Graph;
 
 namespace Bastion.Core.Domain.Encryption.Services;
 
@@ -83,12 +85,10 @@ public class StorageService : IStorageService
             if (userSecret.OIDReceiver != null) 
             {
                 IDictionary<string, string> receivers = new Dictionary<string, string>();
-                int receiverNumber = 0;
                 foreach (string receiver in userSecret.OIDReceiver) 
                 {
-                    string receiverKey = "receiver" + receiverNumber.ToString();
-                    receivers.Add(receiverKey, receiver);
-                    receiverNumber++;
+                    string receiverKey = RemoveHyphensFromGuid(receiver);
+                    receivers.Add(receiverKey, "false"); // False - have not yet viewed the secret
                 }
                 Response<BlobInfo> response = client.SetMetadata(receivers);
                 var responseDetails = response.GetRawResponse();
@@ -161,5 +161,13 @@ public class StorageService : IStorageService
         string jsonData = JsonConvert.SerializeObject(secretJsonFormat);
 
         return jsonData;
+    }
+
+    // Helper function to remove the hyphens "-" from the Guid of the OID, as these are not accepted in the key naming convention for metadata
+    public static string RemoveHyphensFromGuid(string guid)
+    {
+        String chars = "[" + String.Concat('-') + "]";
+        string guidStripped = Regex.Replace(guid, chars, string.Empty);
+        return guidStripped;
     }
 }
