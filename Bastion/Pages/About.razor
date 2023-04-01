@@ -12,8 +12,17 @@
 
 <PageTitle>Bastion</PageTitle>
 
-<h1>About</h1>
-<div>Description</div>
+<h1>About Bastion</h1>
+<div class="alerts">
+    Bastion is a web app that allows for sharing secret messages with end-to-end encryption. 
+    The app uses AES to encrypt and decrypt your messages, and stores them safely until they are opened by a receiver before their lifetime ends.
+    When a secret is opened, or it's lifetime expires, the secret is deleted and cannot be retrieved.
+</div>
+<div class="alerts">
+    The secret can either be shared using the generated URL by itself, or it can be shared with either one receiver, or a group of receivers,
+    by choosing who you want to share it with prior to generating the secret URL. To be able to choose your receiver(s), you need to login to the
+    web app and authenticate yourself.
+</div>
 
 @code {
 
