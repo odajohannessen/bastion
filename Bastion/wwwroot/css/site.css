@@ -85,11 +85,12 @@ textarea {
     margin-left: auto;
     margin-right: auto;
     min-width: 600pt;
-    min-height: 150pt;
+    min-height: 100pt;
     padding: 10px;
     border-radius: 3px;
 }
 
+/* Makes app mobile friendly */
 @media only screen and (max-width: 768px) {
     textarea {
         display: block;
@@ -99,6 +100,10 @@ textarea {
         min-height: 150pt;
         padding: 10px;
         border-radius: 3px;
+    }
+
+    .receivers {
+        min-width: 150pt;
     }
 }
 
@@ -124,6 +129,19 @@ textarea {
     padding: 10px;
     border-radius: 3px;
 }
+
+.container {
+    display: flex;
+    justify-content: center;
+    gap: 10pt;
+}
+
+.receivers {
+    min-width: 200pt;
+    max-width: 500pt;
+}
+
+
 /*
     Bouvet colors:
     #F9EAD4 light beige

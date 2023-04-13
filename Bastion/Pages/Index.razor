@@ -13,6 +13,8 @@
 @using Microsoft.Identity.Web
 @using Microsoft.Graph
 @using System.Security.Claims;
+@using BootstrapBlazor.Components;
+@using System.Diagnostics.CodeAnalysis;
 @inject Microsoft.Graph.GraphServiceClient GraphServiceClient
 @inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
 @inject Microsoft.Identity.Web.ITokenAcquisition TokenAcquisitionService
@@ -32,20 +34,21 @@
             <EditForm Model="@userInputModel" OnSubmit="@HandleValidSubmit">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
-                <label>
-                    <InputTextArea id="plaintext" @bind-Value="authUserInputModel.SecretPlaintext" />
-                </label>
+                <div>
+                    <label>
+                        <InputTextArea id="plaintext" @bind-Value="authUserInputModel.SecretPlaintext" />
+                    </label>
+                </div>
                 <br /> <br />
-                <label>
-                    Receiver:
-                    <InputSelect multiple @bind-Value="authUserInputModel.OIDReceiver" class="form-select">
-                        <option value="0">Select receiver(s)</option>
-                        @foreach (var receiver in users)
-                        {
-                            <option value="@receiver.Id">@receiver.DisplayName</option>
-                        }
-                    </InputSelect>
-                </label>
+                Receivers:
+                <div class="container">
+                        <div class="receivers">
+                            <MultiSelect Items="@Items" @bind-Value="@authUserInputModel.OIDReceiver" />
+                        </div>
+                        <div>
+                            <Button Icon="fa-regular fa-trash-can" Text="Clear" OnClick="@ClearItems" />
+                        </div>
+                </div>
                 <div>
                     <br />
                     <label>
@@ -66,10 +69,7 @@
 
             <h1>Share the encrypted secret</h1>
             <div>
-                <button class="btn btn-primary" @onclick="CopyToClipboard">
-                    <span class="oi oi-clipboard" aria-hidden="true"></span>
-                    Copy one-click link
-                </button>
+                <Button Icon="fa-regular fa-clipboard" Text="Copy one-click link" OnClick="@CopyToClipboard" />
 
                 <br /> <br />
                 @if (id != Guid.Empty)
@@ -83,7 +83,7 @@
 
                 @if (!DisplayAlert)
                 {
-                    <div class="alert alert-danger fade-in" role="alert">
+                    <div class="alert alert-danger fade-in alerts" role="alert">
                         Error storing secret
                     </div>
                 }
@@ -110,7 +110,7 @@
                 </InputRadioGroup>
             </label>
             <br/><br/>
-            <button class="btn btn-primary" type="submit">Encrypt</button>
+            <Button class="btn btn-primary" type="submit">Encrypt</Button>
             </div>
         </EditForm>
 
@@ -118,10 +118,8 @@
 
         <h1>Share the encrypted secret</h1>
         <div>
-            <button class="btn btn-primary" @onclick="CopyToClipboard">
-                <span class="oi oi-clipboard" aria-hidden="true"></span>
-                Copy one-click link
-            </button>
+            <Button Icon="fa-regular fa-clipboard" Text="Copy one-click link" OnClick="@CopyToClipboard" />
+
             <br/> <br/>
             @if (id != Guid.Empty)
             {
@@ -134,7 +132,7 @@
 
             @if (!DisplayAlert)
             {
-                <div class="alert alert-danger fade-in" role="alert">
+                <div class="alert alert-danger fade-in alerts" role="alert">
                     Error storing secret
                 </div>
             }
@@ -167,6 +165,16 @@
     [Parameter]
     public bool DisplayAlert { get; set; } = true;
 
+    [NotNull]
+    private List<SelectedItem>? Items { get; set; }
+
+    [NotNull]
+    private List<SelectedItem>? DataSource { get; set; }
+
+    private string[] SelectedArrayValues { get; set; } = Array.Empty<string>(); // for testing
+
+    private List<SelectedItem>? SearchItemsSource { get; set; } // for search if it is implemented
+
     protected override async Task OnInitializedAsync()
     {
         var authenticationState = await authenticationStateTask;
@@ -198,18 +206,33 @@
                     throw new Exception("Invalid tenantId or issuer.");
                 }
 
-                // Doesn't work
-                //var claimtest = user.Claims.First(c => c.Type == "aud");
-
                 // Get list of all users, and logged in user
-                users = await GraphServiceClient.Users.Request().GetAsync();
+                users = await GraphServiceClient.Users.Request().GetAsync(); //use this list to populate, equivalent to Items
                 userInfo = await GraphServiceClient.Me.Request().GetAsync();
+
+                DataSource = new List<SelectedItem>();
+                // Get list from userInfo
+                foreach (var item in users)
+                {
+                    SelectedItem option = new SelectedItem(item.Id, item.DisplayName);
+                    DataSource.Add(option);
+                }
+
+                Items = GenerateDataSource(DataSource);
             }
             catch (Exception ex)
             {
                 ConsentHandler.HandleException(ex);
             }
         }
+    }
+
+    private static List<SelectedItem> GenerateDataSource(List<SelectedItem> source) => source.Select(i => new SelectedItem(i.Value, i.Text)).ToList();
+
+    private void ClearItems()
+    {
+        authUserInputModel.OIDReceiver = Array.Empty<string>();
+        //SelectedArrayValues = Array.Empty<string>();
     }
 
     private async void HandleValidSubmit()
@@ -227,16 +250,6 @@
                 throw new Exception("user cannot be null.");
             }
             string OIDSender = userInfo.Id;
-
-            // Check that default value is not chosen, remove it if it is
-            foreach (string receiver in authUserInputModel.OIDReceiver)
-            {
-                if (receiver == "0")
-                {
-                    authUserInputModel.OIDReceiver = authUserInputModel.OIDReceiver.Where(val => val != "0").ToArray();
-                    break;
-                }
-            }
 
             // Create user input
             var responseInput = await mediator.Send(new CreateUserInput.Request(authUserInputModel.SecretPlaintext, authUserInputModel.Lifetime, OIDSender, authUserInputModel.OIDReceiver));
@@ -316,7 +329,7 @@
         }
         catch
         {
-            Console.WriteLine("Cannot copy text to clipboard");
+            System.Console.WriteLine("Cannot copy text to clipboard");
         }
     }
 }

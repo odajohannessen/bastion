@@ -16,6 +16,7 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.AspNetCore.Rewrite;
+using BootstrapBlazor.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,7 @@ builder.Services.AddTransient<IStorageService, StorageService>();
 builder.Services.AddTransient<IDeletionService, DeletionService>();
 builder.Services.AddTransient<LoggingManager>();
 builder.Services.AddScoped<CopyToClipboardManager>();
+builder.Services.AddBootstrapBlazor();
 
 // Default login after startup before reaching index page
 //builder.Services.AddAuthorization(options =>
