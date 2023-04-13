@@ -119,7 +119,7 @@ public class DecryptAndDeleteSecret
             }
             ciphertext = Convert.FromBase64String(userSecret.Ciphertext);
 
-            // Confirm the user who has requested to see the secret is the intended receive
+            // Confirm the user who has requested to see the secret is the intended receiver
             if (!request.OIDUser.IsNullOrEmpty())
             {
                 //bool successHash = HashingHelper.VerifyHash(request.OIDReceiver, userSecret.OIDReceiver);
