@@ -42,15 +42,16 @@ public class EncryptAndSaveSecret
             if (request.userInputDto.OIDSender.IsNullOrEmpty() && request.userInputDto.OIDReceiver.IsNullOrEmpty())
             {
                 logging.LogEvent($"A request to create a secret for an anonymous user has been received. ID: '{request.userInputDto.Id}'.");
-
+            }
+            else
+            {
                 // Hash OIDs for sender and receiver, if user is authenticated when creating secret
                 //sender = HashingHelper.GetHash(request.userInputDto.OIDSender);
                 //receiver = HashingHelper.GetHash(request.userInputDto.OIDReceiver);
                 //logging.LogTrace($"Sender and receiver OIDs hashed successfully.");
-            }
-            else
-            {
-                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{request.userInputDto.OIDReceiver.ToString()}' has been received. ID: '{request.userInputDto.Id}'.");
+
+                string receivers = string.Join(", ", request.userInputDto.OIDReceiver);
+                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{receivers}' has been received. ID: '{request.userInputDto.Id}'.");
             }
 
             // Encrypt data
