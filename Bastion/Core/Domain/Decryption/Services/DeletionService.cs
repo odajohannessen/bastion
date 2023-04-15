@@ -53,7 +53,7 @@ public class DeletionService : IDeletionService
     {
         // Storage container
         string StorageContainerName = "secrets-test";
-        string StorageAccountName = "sabastion";
+        string StorageAccountName = "sabastionsecrets";
         string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();

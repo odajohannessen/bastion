@@ -171,7 +171,7 @@ public class DecryptAndDeleteSecret
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
             string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastion";
+            string StorageAccountName = "sabastionsecrets";
             string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
@@ -206,7 +206,7 @@ public class DecryptAndDeleteSecret
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
             string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastion";
+            string StorageAccountName = "sabastionsecrets";
             string uriContainer = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}";
             string blobName = "";
 
@@ -232,7 +232,7 @@ public class DecryptAndDeleteSecret
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
             string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastion";
+            string StorageAccountName = "sabastionsecrets";
             string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
@@ -251,11 +251,11 @@ public class DecryptAndDeleteSecret
         // Return true if there are no receivers
         // Will also return false if the receiver is not found among the receivers
         public static bool CheckSecretReceiver(string blobName, string OIDUser)
-        {
+        {   
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
             string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastion";
+            string StorageAccountName = "sabastionsecrets";
             string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
@@ -313,7 +313,7 @@ public class DecryptAndDeleteSecret
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
             string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastion";
+            string StorageAccountName = "sabastionsecrets";
             string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);

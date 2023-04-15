@@ -58,7 +58,7 @@ public class StorageManager
     public async Task<bool> DeleteBlob(string storageContainerName, string blobname)
     {
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
-        string StorageAccountName = "sabastion";
+        string StorageAccountName = "sabastionsecrets";
         string uri = $"https://{StorageAccountName}.blob.core.windows.net/{storageContainerName}/{blobname}";
         BlobClient blobClient = new BlobClient(new Uri(uri), credentials);
 
@@ -154,7 +154,7 @@ public class StorageManager
     {
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
-        string StorageAccountName = "sabastion";
+        string StorageAccountName = "sabastionsecrets";
         string uriContainer = $"https://{StorageAccountName}.blob.core.windows.net/{storageContainerName}";
 
         try
