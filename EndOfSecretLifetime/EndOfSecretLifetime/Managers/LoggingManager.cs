@@ -16,7 +16,6 @@ public class LoggingManager
     public LoggingManager()
     {
         // Initialize Telemetry Client
-        //var connectionString = Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING");
         string connectionString = GetSecretFromKeyVaultHelper.GetSecret("APPLICATIONINSIGHTS-CONNECTION-STRING");
         if (connectionString == "Secret not found") 
         {
