@@ -38,6 +38,7 @@ public class EncryptAndSaveSecret
             UserSecret userSecret;
             string sender = request.userInputDto.OIDSender;
             string[]? receiver = request.userInputDto.OIDReceiver;
+            string receivers = "";
 
             if (request.userInputDto.OIDSender.IsNullOrEmpty() && request.userInputDto.OIDReceiver.IsNullOrEmpty())
             {
@@ -50,7 +51,7 @@ public class EncryptAndSaveSecret
                 //receiver = HashingHelper.GetHash(request.userInputDto.OIDReceiver);
                 //logging.LogTrace($"Sender and receiver OIDs hashed successfully.");
 
-                string receivers = string.Join(", ", request.userInputDto.OIDReceiver);
+                receivers = string.Join(", ", request.userInputDto.OIDReceiver);
                 logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{receivers}' has been received. ID: '{request.userInputDto.Id}'.");
             }
 
@@ -82,7 +83,7 @@ public class EncryptAndSaveSecret
             if (success && request.userInputDto.OIDSender.IsNullOrEmpty() && request.userInputDto.OIDReceiver.IsNullOrEmpty())
                 logging.LogEvent($"Secret successfully stored for anonymous user. ID: '{request.userInputDto.Id}'.");
             else if (success && !request.userInputDto.OIDSender.IsNullOrEmpty() && !request.userInputDto.OIDReceiver.IsNullOrEmpty())
-                logging.LogEvent($"A request to create a secret for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{request.userInputDto.OIDReceiver.ToString()}' has been received.ID: '{request.userInputDto.Id}");
+                logging.LogEvent($"Secret successfully stored for sender with OID '{request.userInputDto.OIDSender}' to recipient with OIDs '{receivers}' has been received.ID: '{request.userInputDto.Id}");
 
             return new Response(success, userSecret.Id.ToString());
         }
