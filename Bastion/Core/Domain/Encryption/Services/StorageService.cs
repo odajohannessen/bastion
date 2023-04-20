@@ -11,6 +11,7 @@ using Bastion.Managers;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.Graph;
+using System.IO;
 
 namespace Bastion.Core.Domain.Encryption.Services;
 
@@ -77,9 +78,38 @@ public class StorageService : IStorageService
         {
             // Upload to blob
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
+ 
+            // Put request here as a work around for the header issue 
+            TokenRequestContext requestContext = new TokenRequestContext(new[] { "https://storage.azure.com/.default" });
+            AccessToken token = await credentials.GetTokenAsync(requestContext);
+            string accessToken = token.Token;
+
             byte[] secretByteArray = Encoding.UTF8.GetBytes(secretJsonFormat);
-            MemoryStream ms = new MemoryStream(secretByteArray);
-            await client.UploadAsync(ms);
+            using (MemoryStream ms = new MemoryStream(secretByteArray))
+            {
+                //var uploadResponse = await client.UploadAsync(ms);
+                HttpRequestMessage request = new HttpRequestMessage()
+                {
+                    Method = HttpMethod.Put,
+                    RequestUri = new Uri(uriSA),
+                    Content = new StreamContent(ms)
+                };
+                request.Headers.Add("x-ms-version", "2020-04-08");
+                request.Headers.Add("x-ms-blob-type", "BlockBlob");
+                request.Headers.Add("Authorization", "bearer " + accessToken);
+
+                HttpClient httpClient = new HttpClient();
+                HttpResponseMessage response = await httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    logging.LogEvent($"{response.StatusCode}: {response.ReasonPhrase}");
+                    logging.LogException($"Error uploading secret to blob. ID: '{userSecret.Id}'. ");
+                    return false;
+                }
+                //logging.LogEvent($"{response.StatusCode}: {response.ReasonPhrase}");
+
+            }
 
             // Update receivers in metadata if receivers array in user secret is not null
             if (userSecret.OIDReceiver != null) 
