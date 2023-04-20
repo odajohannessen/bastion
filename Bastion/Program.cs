@@ -17,14 +17,17 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.AspNetCore.Rewrite;
 using BootstrapBlazor.Components;
+using Microsoft.Graph.ExternalConnectors;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var initialScopes = builder.Configuration["DownstreamApi:Scopes"]?.Split(' ') ?? builder.Configuration["MicrosoftGraph:Scopes"]?.Split(' ');
 
+//builder.Services.AddTransient<IConfiguration>();
+
 // Add services to the container.
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd")) // Env variables typ evt configuration
         .EnableTokenAcquisitionToCallDownstreamApi(initialScopes)
 .AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
             .AddInMemoryTokenCaches();
