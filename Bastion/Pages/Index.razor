@@ -43,7 +43,7 @@
                 Receivers:
                 <div class="container">
                         <div class="receivers">
-                            <MultiSelect Items="@Items" @bind-Value="@authUserInputModel.OIDReceiver" />
+                        <MultiSelect Items="@Items" @bind-Value="@authUserInputModel.OIDReceiver" ShowSearch="true" OnSearchTextChanged="@OnSearch" />
                         </div>
                         <div>
                             <Button Icon="fa-regular fa-trash-can" Text="Clear" OnClick="@ClearItems" />
@@ -171,8 +171,6 @@
     [NotNull]
     private List<SelectedItem>? DataSource { get; set; }
 
-    private string[] SelectedArrayValues { get; set; } = Array.Empty<string>(); // for testing
-
     private List<SelectedItem>? SearchItemsSource { get; set; } // for search if it is implemented
 
     protected override async Task OnInitializedAsync()
@@ -232,6 +230,12 @@
     private void ClearItems()
     {
         authUserInputModel.OIDReceiver = Array.Empty<string>();
+    }
+
+    private IEnumerable<SelectedItem> OnSearch(string searchText)
+    {
+        SearchItemsSource ??= Items;
+        return SearchItemsSource.Where(i => i.Text.Contains(searchText, System.StringComparison.OrdinalIgnoreCase));
     }
 
     private async void HandleValidSubmit()
