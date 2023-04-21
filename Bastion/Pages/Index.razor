@@ -110,7 +110,7 @@
                 </InputRadioGroup>
             </label>
             <br/><br/>
-            <Button class="btn btn-primary" type="submit">Encrypt</Button>
+            <button class="btn btn-primary" type="submit">Encrypt</button>
             </div>
         </EditForm>
 
@@ -299,7 +299,7 @@
                 if (response.success)
                 {
                     id = userInput.Id;
-                    url = $"https://bastion-bouvet.azurewebsites.net/{id.ToString()}";
+                    url = $"https://bouvet-bastion.azurewebsites.net/{id.ToString()}";
                     StateHasChanged();
                 }
                 else
