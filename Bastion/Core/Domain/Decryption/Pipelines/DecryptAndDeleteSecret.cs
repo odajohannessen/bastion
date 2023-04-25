@@ -130,7 +130,7 @@ public class DecryptAndDeleteSecret
                 bool receiverStatus = CheckSecretReceiver(blobName, request.OIDUser);
                 if (!receiverStatus)
                 {
-                    return new Response(success, "You are not an intended recipient, or has already viewed this secret once.", "");
+                    return new Response(success, "You are not an intended recipient, or have already viewed this secret once.", "");
                 }
             }
 
