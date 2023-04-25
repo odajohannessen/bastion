@@ -143,15 +143,20 @@
 
 
 @code {
+    // Rretrieve web app environment variables/local secrets
     [Inject]
     private IConfiguration Configuration { get; set; }
 
+    // Input models
     private UserInputModel userInputModel = new();
     private AuthUserInputModel authUserInputModel = new();
+
+    // Default values
     private Guid id = default;
     private string url = "";
     string message = "";
 
+    // Variables used for authenticated users
     bool authenticated;
 
     IGraphServiceUsersCollectionPage? users;
@@ -162,33 +167,36 @@
 
     private IEnumerable<Claim> claims = Enumerable.Empty<Claim>();
 
+    // Alert boolean 
     [Parameter]
     public bool DisplayAlert { get; set; } = true;
 
+    // Setup of multiselect component input for receivers
     [NotNull]
     private List<SelectedItem>? Items { get; set; }
 
     [NotNull]
     private List<SelectedItem>? DataSource { get; set; }
 
-    private List<SelectedItem>? SearchItemsSource { get; set; } // for search if it is implemented
+    // Setup of search bar in multiselect component
+    private List<SelectedItem>? SearchItemsSource { get; set; } 
 
+    // Run at initialization of page
     protected override async Task OnInitializedAsync()
     {
         var authenticationState = await authenticationStateTask;
         var user = authenticationState.User;
         authenticated = user.Identity?.IsAuthenticated ?? false;
 
+        // If a user is logged in to the web application
         if (authenticated)
         {
             try
             {
-                // Check claims tenant and issuer
-                // Tenant should be the directory tenant ID of the app registration of Bastion
-                // Issuer should be Microsoft and tenant ID
+                // Validate claims tenant and issuer
                 string issuer = "";
                 claims = user.Claims;
-                //var test = claims.First(c => c.Type == "Issuer");
+
                 foreach (Claim claim in claims)
                 {
                     issuer = claim.Issuer;
@@ -204,12 +212,13 @@
                     throw new Exception("Invalid tenantId or issuer.");
                 }
 
-                // Get list of all users, and logged in user
-                users = await GraphServiceClient.Users.Request().GetAsync(); //use this list to populate, equivalent to Items
+                // Get list of all users and info on current logged in user
+                users = await GraphServiceClient.Users.Request().GetAsync(); // Use this list to populate, equivalent to Items
                 userInfo = await GraphServiceClient.Me.Request().GetAsync();
 
+                // Setup the selection of receivers for the multiselect component
                 DataSource = new List<SelectedItem>();
-                // Get list from userInfo
+
                 foreach (var item in users)
                 {
                     SelectedItem option = new SelectedItem(item.Id, item.DisplayName);
@@ -225,19 +234,23 @@
         }
     }
 
+    // Generates the receivers for the multiselect component
     private static List<SelectedItem> GenerateDataSource(List<SelectedItem> source) => source.Select(i => new SelectedItem(i.Value, i.Text)).ToList();
 
+    // Clears selected receivers from multiselect
     private void ClearItems()
     {
         authUserInputModel.OIDReceiver = Array.Empty<string>();
     }
 
+    // Search method for multiselect
     private IEnumerable<SelectedItem> OnSearch(string searchText)
     {
         SearchItemsSource ??= Items;
         return SearchItemsSource.Where(i => i.Text.Contains(searchText, System.StringComparison.OrdinalIgnoreCase));
     }
 
+    // Method which handles form submission
     private async void HandleValidSubmit()
     {
         message = "Encrypting secret...";
@@ -246,12 +259,14 @@
         var user = authenticationState.User;
         authenticated = user.Identity?.IsAuthenticated ?? false;
 
+        // If a user is logged in to the web application
         if (authenticated)
         {
             if (userInfo == null)
             {
                 throw new Exception("user cannot be null.");
             }
+            // Get the OID of the current user, the sender
             string OIDSender = userInfo.Id;
 
             // Create user input
@@ -270,29 +285,31 @@
                 {
                     id = userInput.Id;
                     url = $"https://bouvet-bastion.azurewebsites.net/{id.ToString()}";
-                    StateHasChanged();
+                    StateHasChanged(); // Update state
                 }
                 else
                 {
                     message = "";
                     url = "";
-                    DisplayAlert = false;
-                    StateHasChanged();
+                    DisplayAlert = false; // Change bool to false to display error message
+                    StateHasChanged(); // Update state
                 }
             }
             else
             {
                 message = "";
                 url = "";
-                DisplayAlert = false;
-                StateHasChanged();
+                DisplayAlert = false; // Change bool to false to display error message
+                StateHasChanged(); // Update state
             }
         }
+        // User is anonymous and has not logged in
         else
         {
+            // Create user input
             var responseInput = await mediator.Send(new CreateUserInput.Request(userInputModel.SecretPlaintext, userInputModel.Lifetime));
 
-            if (responseInput.success) // TODO: Rewrite as helper method?
+            if (responseInput.success) 
             {
                 // Create UserInputDto
                 UserInput userInput = responseInput.userInput;
@@ -304,26 +321,27 @@
                 {
                     id = userInput.Id;
                     url = $"https://bouvet-bastion.azurewebsites.net/{id.ToString()}";
-                    StateHasChanged();
+                    StateHasChanged(); // Update state
                 }
                 else
                 {
                     message = "";
                     url = "";
-                    DisplayAlert = false;
-                    StateHasChanged();
+                    DisplayAlert = false; // Change bool to false to display error message
+                    StateHasChanged(); // Update state
                 }
             }
             else
             {
                 message = "";
                 url = "";
-                DisplayAlert = false;
-                StateHasChanged();
+                DisplayAlert = false; // Change bool to false to display error message
+                StateHasChanged();  // Update state
             }
         }
     }
 
+    // Copy to clipboard method
     async Task CopyToClipboard()
     {
         try
