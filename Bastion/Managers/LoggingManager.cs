@@ -8,6 +8,7 @@ using MediatR;
 
 namespace Bastion.Managers;
 
+// This manager facilitates logging to AppInsights in Azure
 public class LoggingManager
 {
     private readonly TelemetryClient telemetryClient;
