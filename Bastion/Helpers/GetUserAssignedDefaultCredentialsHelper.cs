@@ -7,8 +7,9 @@ public class GetUserAssignedDefaultCredentialsHelper
     // Get User assigned DC
     public static DefaultAzureCredential GetUADC()
     {
-        // Exclude options to decrease time spent checking options
-        string userAssignedClientId = "7a5e9bc8-041a-48a4-90cd-28b2b7539a45";
+        // Exclude options to decrease time spent testing each alternative
+
+        string userAssignedClientId = Environment.GetEnvironmentVariable("UserAssignedClientId");
         var options = new DefaultAzureCredentialOptions
         {
             ExcludeEnvironmentCredential = true,

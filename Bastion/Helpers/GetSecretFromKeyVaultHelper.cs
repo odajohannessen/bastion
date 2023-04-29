@@ -10,7 +10,7 @@ public class GetSecretFromKeyVaultHelper
     public static string GetSecret(string secretName)
     {
         Response<KeyVaultSecret> secret;
-        string keyVaultName = "kvbastion-secrets";
+        string keyVaultName = Environment.GetEnvironmentVariable("KeyVaultName");
         var uri = $"https://{keyVaultName}.vault.azure.net/";
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
         SecretClient client = new SecretClient(new Uri(uri), credentials);

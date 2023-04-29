@@ -68,8 +68,8 @@ public class StorageService : IStorageService
         }
 
         // Storage container
-        string StorageContainerName = "secrets-test";
-        string StorageAccountName = "sabastionsecrets";
+        string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName");
+        string StorageContainerName = Environment.GetEnvironmentVariable("StorageContainerName");
         string blobName = userSecret.Id.ToString() + "--" + userSecret.ExpireTimeStamp.ToString("yyyy-MM-ddTHH:mm:ssK") + ".json";
         string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
@@ -79,7 +79,7 @@ public class StorageService : IStorageService
             // Upload to blob
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
  
-            // Put request here as a work around for the header issue 
+            // Put request here as a work around for the reoccurring header issue for the web app
             TokenRequestContext requestContext = new TokenRequestContext(new[] { "https://storage.azure.com/.default" });
             AccessToken token = await credentials.GetTokenAsync(requestContext);
             string accessToken = token.Token;
@@ -107,8 +107,6 @@ public class StorageService : IStorageService
                     logging.LogException($"Error uploading secret to blob. ID: '{userSecret.Id}'. ");
                     return false;
                 }
-                //logging.LogEvent($"{response.StatusCode}: {response.ReasonPhrase}");
-
             }
 
             // Update receivers in metadata if receivers array in user secret is not null
@@ -155,14 +153,14 @@ public class StorageService : IStorageService
         {
             Retry =
             {
-                Delay= TimeSpan.FromSeconds(2),
+                Delay = TimeSpan.FromSeconds(2),
                 MaxDelay = TimeSpan.FromSeconds(16),
                 MaxRetries = 5,
                 Mode = RetryMode.Exponential
             }
         };
 
-        string keyVaultName = "kvbastion-secrets";
+        string keyVaultName = Environment.GetEnvironmentVariable("KeyVaultName");
         string uri = $"https://{keyVaultName}.vault.azure.net";
         string keyName = userSecret.Id.ToString(); // Key vault naming convention does not allow datetime format in string, only using id here
         string keyValue = Convert.ToBase64String(userSecret.Key);

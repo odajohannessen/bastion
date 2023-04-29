@@ -9,6 +9,7 @@ using Azure;
 using Bastion.Core.Domain.Encryption;
 using Bastion.Helpers;
 using Bastion.Managers;
+using System;
 
 namespace Bastion.Core.Domain.Decryption.Services;
 
@@ -52,8 +53,8 @@ public class DeletionService : IDeletionService
     private async Task<bool> DeleteSecretFromBlobStorage(string blobName)
     {
         // Storage container
-        string StorageContainerName = "secrets-test";
-        string StorageAccountName = "sabastionsecrets";
+        string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName");
+        string StorageContainerName = Environment.GetEnvironmentVariable("StorageContainerName");
         string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
@@ -86,7 +87,7 @@ public class DeletionService : IDeletionService
             }
         };
 
-        string keyVaultName = "kvbastion-secrets"; 
+        string keyVaultName = Environment.GetEnvironmentVariable("KeyVaultName"); 
         string uri = $"https://{keyVaultName}.vault.azure.net";
 
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
@@ -102,7 +103,7 @@ public class DeletionService : IDeletionService
         }
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(2)); // Test with delay to avoid conflict with deletion. 1.5 second too short.
+            await Task.Delay(TimeSpan.FromSeconds(2)); // Delay to avoid conflict with purging.
             client.PurgeDeletedSecret(id);
         }
         catch (Exception e)

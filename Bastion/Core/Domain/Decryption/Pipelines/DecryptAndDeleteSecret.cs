@@ -170,8 +170,8 @@ public class DecryptAndDeleteSecret
         {
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
-            string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastionsecrets";
+            string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName");
+            string StorageContainerName = Environment.GetEnvironmentVariable("StorageContainerName");
             string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
@@ -205,8 +205,8 @@ public class DecryptAndDeleteSecret
         {
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
-            string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastionsecrets";
+            string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName");
+            string StorageContainerName = Environment.GetEnvironmentVariable("StorageContainerName");
             string uriContainer = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}";
             string blobName = "";
 
@@ -231,8 +231,8 @@ public class DecryptAndDeleteSecret
         {
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
-            string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastionsecrets";
+            string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName");
+            string StorageContainerName = Environment.GetEnvironmentVariable("StorageContainerName");
             string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
@@ -254,8 +254,8 @@ public class DecryptAndDeleteSecret
         {   
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
-            string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastionsecrets";
+            string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName");
+            string StorageContainerName = Environment.GetEnvironmentVariable("StorageContainerName");
             string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
@@ -312,8 +312,8 @@ public class DecryptAndDeleteSecret
         {
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
-            string StorageContainerName = "secrets-test";
-            string StorageAccountName = "sabastionsecrets";
+            string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName");
+            string StorageContainerName = Environment.GetEnvironmentVariable("StorageContainerName");
             string uriSA = $"https://{StorageAccountName}.blob.core.windows.net/{StorageContainerName}/{blobName}";
 
             BlobClient client = new BlobClient(new Uri(uriSA), credentials);
