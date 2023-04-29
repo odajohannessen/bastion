@@ -109,7 +109,6 @@ public class DeletionService : IDeletionService
         catch (Exception e)
         {
             logging.LogException($"Error purging deleted key: '{e.Message}'");
-            throw new Exception($"Error purging deleted key: '{e.Message}'");
         }
 
         return true;
