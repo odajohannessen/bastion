@@ -17,7 +17,6 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.AspNetCore.Rewrite;
 using BootstrapBlazor.Components;
-using Microsoft.Graph.ExternalConnectors;
 
 var builder = WebApplication.CreateBuilder(args);
 
