@@ -58,7 +58,7 @@ public class StorageManager
     public async Task<bool> DeleteBlob(string storageContainerName, string blobname)
     {
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
-        string StorageAccountName = "sabastionsecrets";
+        string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName");
         string uri = $"https://{StorageAccountName}.blob.core.windows.net/{storageContainerName}/{blobname}";
         BlobClient blobClient = new BlobClient(new Uri(uri), credentials);
 
@@ -79,7 +79,7 @@ public class StorageManager
     // Delete a key from key vault
     public async Task<bool> DeleteKey(string keyName)
     {
-        string keyVaultName = "kvbastion-secrets";
+        string keyVaultName = Environment.GetEnvironmentVariable("KeyVaultName");
         var uri = $"https://{keyVaultName}.vault.azure.net";
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
         SecretClient client = new SecretClient(new Uri(uri), credentials);
@@ -154,7 +154,7 @@ public class StorageManager
     {
         var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();
 
-        string StorageAccountName = "sabastionsecrets";
+        string StorageAccountName = Environment.GetEnvironmentVariable("StorageAccountName"); ;
         string uriContainer = $"https://{StorageAccountName}.blob.core.windows.net/{storageContainerName}";
 
         try

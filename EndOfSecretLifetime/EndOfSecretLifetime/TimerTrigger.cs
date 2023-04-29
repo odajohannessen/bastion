@@ -29,7 +29,7 @@ public class TimerTrigger
     {
         logging.LogEvent("Starting life time check of stored secrets");
 
-        string storageContainerName = "secrets-test";
+        string storageContainerName = Environment.GetEnvironmentVariable("StorageContainerName");
         bool success = await storageManager.CheckExpirationAndDelete(storageContainerName);
 
         logging.LogEvent("Finished life time check of stored secrets");        
