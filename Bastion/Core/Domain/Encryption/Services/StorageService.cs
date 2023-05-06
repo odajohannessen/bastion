@@ -77,7 +77,7 @@ public class StorageService : IStorageService
         try
         {
             // Upload to blob
-            //BlobClient client = new BlobClient(new Uri(uriSA), credentials);
+            BlobClient client = new BlobClient(new Uri(uriSA), credentials);
  
             // Put request here as a work around for the reoccurring header issue for the web app
             TokenRequestContext requestContext = new TokenRequestContext(new[] { "https://storage.azure.com/.default" });
