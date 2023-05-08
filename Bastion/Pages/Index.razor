@@ -213,7 +213,7 @@
                 }
 
                 // Get list of all users and info on current logged in user
-                users = await GraphServiceClient.Users.Request().GetAsync(); // Use this list to populate, equivalent to Items
+                users = await GraphServiceClient.Users.Request().GetAsync(); // Use this list to populate
                 userInfo = await GraphServiceClient.Me.Request().GetAsync();
 
                 // Setup the selection of receivers for the multiselect component

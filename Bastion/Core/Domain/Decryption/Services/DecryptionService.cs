@@ -48,7 +48,7 @@ public class DecryptionService : IDecryptionService
                 aes.Key = Key;
                 aes.IV = IV;
 
-                // Create an encryptor to perform the stream transform.
+                // Create an encryptor to perform the stream transform
                 ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
                 using (MemoryStream ms = new MemoryStream(ciphertext))

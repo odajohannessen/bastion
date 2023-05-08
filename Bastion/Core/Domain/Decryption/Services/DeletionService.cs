@@ -103,7 +103,7 @@ public class DeletionService : IDeletionService
         }
         try
         {
-            await Task.Delay(TimeSpan.FromSeconds(3)); // Delay to avoid conflict with purging.
+            await Task.Delay(TimeSpan.FromSeconds(3)); // Delay to avoid conflict with purging
             client.PurgeDeletedSecret(id);
         }
         catch (Exception e)

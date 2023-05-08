@@ -52,12 +52,12 @@ public class DecryptAndDeleteSecret
             if (request.Id == null)
             {
                 logging.LogException($"Id cannot be null");
-                throw new Exception("Id cannot be null"); // throw or return here? Is this even necessary?
+                throw new Exception("Id cannot be null");
             }
 
             bool success = false;
 
-            // Check if given id is in a GUID format
+            // Validate if given id is in a GUID format
             var result = Regex.Replace(request.Id, @"(?im)^[{(]?[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?$","'$0'");
             if (string.Equals(request.Id, result))
             {
@@ -249,7 +249,7 @@ public class DecryptAndDeleteSecret
 
         // Return true if OIDReceiver has not yet viewed the secret, false if they have
         // Return true if there are no receivers
-        // Will also return false if the receiver is not found among the receivers
+        // Return false if the receiver is not found among the receivers
         public static bool CheckSecretReceiver(string blobName, string OIDUser)
         {   
             var credentials = GetUserAssignedDefaultCredentialsHelper.GetUADC();

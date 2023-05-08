@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.JSInterop;
 
-// This manager lets a user copy text to their clipboard.
+// This manager lets a user copy text to their clipboard
 public sealed class CopyToClipboardManager
 {
     private readonly IJSRuntime _jsRuntime;
