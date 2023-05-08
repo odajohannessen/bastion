@@ -123,7 +123,7 @@ public class StorageManager
                 int from = secretName.IndexOf("--") + 2;
                 int to = secretName.IndexOf(".");
                 string expireTimeStampString = secretName.Substring(from, to - from);
-                DateTime expireTimeStamp = DateTime.Parse(expireTimeStampString).ToUniversalTime(); // TODO: Add utc in parsing? 
+                DateTime expireTimeStamp = DateTime.Parse(expireTimeStampString).ToUniversalTime(); 
 
                 // If secret is expired, add it to the dict
                 if (expireTimeStamp < DateTime.UtcNow)

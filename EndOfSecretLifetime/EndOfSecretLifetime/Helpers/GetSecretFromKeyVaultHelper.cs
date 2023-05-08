@@ -7,7 +7,7 @@ namespace EndOfSecretLifetime.Helpers;
 
 public class GetSecretFromKeyVaultHelper
 {
-    // Access key vault and retrieve a secret
+    // Access key vault to retrieve a secret
     public static string GetSecret(string secretName)
     {
         Response<KeyVaultSecret> secret;

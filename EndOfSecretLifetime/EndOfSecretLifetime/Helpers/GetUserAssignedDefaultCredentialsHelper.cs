@@ -20,7 +20,7 @@ public class GetUserAssignedDefaultCredentialsHelper
             ExcludeAzureCliCredential = true,
             ExcludeAzurePowerShellCredential = true,
             ExcludeInteractiveBrowserCredential = true,
-            ManagedIdentityClientId = userAssignedClientId, // Comment out during testing
+            ManagedIdentityClientId = userAssignedClientId,
         };
         var credentials = new DefaultAzureCredential(options);
         return credentials;
