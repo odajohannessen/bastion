@@ -23,12 +23,12 @@ This folder represents the decryption domain. It does not contain any aggregate 
 The DecryptAndDeleteSecret pipeline takes as input a secret ID and potential OIDs of a user who is logged in. 
 If the user is not logged in and remains anonymous, the default value of the OID is an empty string.
 
-The pipelime utilizes two services, the IDecryptionService and IDeletionService. Before calling on any of the services, the pipeline checks if the secret has receivers.
+The pipeline utilizes two services, the IDecryptionService and IDeletionService. Before calling on any of the services, the pipeline checks if the secret has receivers.
 If the secret has predefined receivers, and the user is not logged in, a response is returned prompting the user to login. 
 
 The pipeline then gets the key from the key vault and the JSON format string from blob storage.
 
-The IDecryptionService is called on the ciphertext if the logged in user is an inteded receiver, or if the secret has no receivers defined.
+The IDecryptionService is called on the ciphertext if the logged in user is an intended receiver, or if the secret has no receivers defined.
 
 The IDeletionService is then called to delete the secret from the key vault and storage container, and the pipeline returns a response with the plaintext and the potential sender of the secret.
 
@@ -38,7 +38,7 @@ This model is utilized for taking user input in the case of a user creating a se
 It has two required parameters, the SecretPlainText and Lifetime. SecretPlainText has an upper limit of 5000 characters, and the Lifetime can be any integer value from 1 to 24 (hours). The default value is set to 1.
 ### AuthUserInputModel
 This model is utilized for taking user input in the case of when an authenticated user creates a secret. The model inherits from the page model.
-It has three required parameters, the SecretPlaintext and Lifetime, which are defined as above for UserInputModel. The OIDReiver is a string array which will contain the OID of any chosen receiver.
+It has two required parameters, the SecretPlaintext and Lifetime, which are defined as above for UserInputModel. The OIDReiver is a string array which will contain the OID of any chosen receiver.
 
 ## Pages
 ### Index
@@ -47,37 +47,37 @@ Both login and logout redirects to the index page.
 
 ### DisplaySecret
 This page has the address /{id}, in case of a valid secret ID (GUID) format the DisplaySecret page is shown.
-If the secret exists, and you are an inteded receiver, or the secret has no receivers, the secret will be displayed.
-If the secret does not exist, or has already been viewed once, there will be an error message.
+If the secret exists, and you are an intended receiver, or the secret has no receivers, the secret will be displayed.
+If the secret does not exist, or has already been viewed once, an error message will be shown.
 
 ### Oops
-In case a value is entered which does not correspond to a valid ID (GUID) format, the user is redirected to this page.
+In the case a value is entered which does not correspond to a valid ID (GUID) format, the user is redirected to this page.
 
 ### About 
-Short description of Bastion.
+Short description of the Bastion secret sharing solution.
 
 ### Logout
 A page setup to redirect to index after a user logs out. 
 
 ## Shared
-Contains different razor components which are used in several pages.
+Contains razor components which are used in several pages.
 
 ## Managers
 ### LoggingManager
-The logging manager sets up logging towards application insights. 
+The logging manager sets up logging towards Application Insights in Azure. 
 
 ### CopyToClipBoardManager
 The copy to clip board manager is utilized to copy text to the user's clip board.
 
 ## Helpers 
 ### GetSecretFromKeyVaultHelper
-A helper method for retreiving a secret from the key vault. 
+A helper method for retrieving a secret from the key vault. 
 
 ### GetUserAssignedDefaultCredentials
 A helper method which returns Default Azure Credentials for the user assigned managed identity which is set up for the resources.
 
 ## Bastion.Tests
-The test project contains four unit tests. 
+The test project contains three unit tests. 
 
 # EndOfSecretLifetime
 The EndOfSecretLifetime is a function app timer trigger which is run every 5 minutes. It checks if any secrets have expired, and deletes them if they have. 
@@ -88,11 +88,11 @@ The storage manager gets all blob names of the blobs currently in the blob conta
 It checks the time stamp of the blob names. If there are any expired secrets, the key and the secret blob are deleted from key vault and storage account, respectively.
 
 ### LoggingManager
-The logging manager sets up logging towards application insights. 
+The logging manager sets up logging towards Application Insights in Azure. 
 
 ## Helpers
 ### GetSecretFromKeyVaultHelper
-A helper method for retreiving a secret from the key vault. 
+A helper method for retrieving a secret from the key vault. 
 
 ### GetUserAssignedDefaultCredentials
 A helper method which returns Default Azure Credentials for the user assigned managed identity which is set up for the resources.
