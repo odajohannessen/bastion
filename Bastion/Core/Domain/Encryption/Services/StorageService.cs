@@ -94,7 +94,7 @@ public class StorageService : IStorageService
                     RequestUri = new Uri(uriSA),
                     Content = new StreamContent(ms)
                 };
-                request.Headers.Add("x-ms-version", "2020-04-08");
+                request.Headers.Add("x-ms-version", "2020-04-08"); // Solves the issue
                 request.Headers.Add("x-ms-blob-type", "BlockBlob");
                 request.Headers.Add("Authorization", "bearer " + accessToken);
 
